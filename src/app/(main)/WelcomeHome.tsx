@@ -20,7 +20,7 @@ import {
 // import { Dialog } from "radix-ui";
 import { useState } from "react";
 
-export default async function WelcomeHome(props: { user?: any }) {
+export default function WelcomeHome(props: { user?: any }) {
   const [open, setOpen] = useState(false);
   const handleOpenChange = (open: boolean) => {
     setOpen(false);
