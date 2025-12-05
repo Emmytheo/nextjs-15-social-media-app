@@ -20,10 +20,6 @@ interface ChatSidebarProps {
 export default function ChatSidebar({ open, onClose }: ChatSidebarProps) {
   const { user } = useSession();
 
-  if (!user) {
-    return null;
-  }
-
   const queryClient = useQueryClient();
 
   const { channel } = useChatContext();
@@ -46,6 +42,10 @@ export default function ChatSidebar({ open, onClose }: ChatSidebarProps) {
     ),
     [onClose],
   );
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div
