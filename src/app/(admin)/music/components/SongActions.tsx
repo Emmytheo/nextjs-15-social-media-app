@@ -101,7 +101,7 @@ export function SongActions({ song, className }: SongActionsProps) {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the song
-              "{song.title}" and remove it from our servers.
+              &quot;{song.title}&quot; and remove it from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

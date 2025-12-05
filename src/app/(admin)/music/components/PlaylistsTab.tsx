@@ -14,7 +14,7 @@ export function PlaylistsTab({ playlists }: PlaylistsTabProps) {
           <ListMusic className="h-10 w-10 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">No playlists created</h3>
           <p className="mb-4 mt-2 text-sm text-muted-foreground">
-            You haven't created any playlists yet. Create one to organize your favorite songs.
+            You haven&apos;t created any playlists yet. Create one to organize your favorite songs.
           </p>
         </div>
       </div>
