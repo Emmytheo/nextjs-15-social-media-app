@@ -4,7 +4,7 @@ import { logout } from "@/app/(auth)/actions";
 import { useSession } from "@/app/(main)/SessionProvider";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, LogOutIcon, Monitor, Moon, Sun, UserIcon } from "lucide-react";
+import { Check, LogOut, Monitor, Moon, Sun, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
@@ -32,6 +32,16 @@ export default function UserButton({ className }: UserButtonProps) {
 
   const queryClient = useQueryClient();
 
+  if (!user) {
+    return (
+      <Link href="/login">
+        <button className={cn("flex-none rounded-full bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90", className)}>
+          Sign In
+        </button>
+      </Link>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -44,7 +54,7 @@ export default function UserButton({ className }: UserButtonProps) {
         <DropdownMenuSeparator />
         <Link href={`/users/${user.username}`}>
           <DropdownMenuItem>
-            <UserIcon className="mr-2 size-4" />
+            <User className="mr-2 size-4" />
             Profile
           </DropdownMenuItem>
         </Link>
@@ -80,7 +90,7 @@ export default function UserButton({ className }: UserButtonProps) {
             logout();
           }}
         >
-          <LogOutIcon className="mr-2 size-4" />
+          <LogOut className="mr-2 size-4" />
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>

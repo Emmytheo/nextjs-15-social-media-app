@@ -1,29 +1,26 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id                    String         @id
-  username              String         @unique
-  displayName           String
-  email                 String?        @unique
-  passwordHash          String?
-  googleId              String?        @unique
-  avatarUrl             String?
-  bio                   String?
+  id           String  @id
+  username     String  @unique
+  displayName  String
+  email        String? @unique
+  passwordHash String?
+  googleId     String? @unique
+  avatarUrl    String?
+  bio          String?
+
   sessions              Session[]
   posts                 Post[]
   following             Follow[]       @relation("Following")
@@ -34,7 +31,21 @@ model User {
   receivedNotifications Notification[] @relation("Recipient")
   issuedNotifications   Notification[] @relation("Issuer")
 
-  createdAt DateTime @default(now())
+  organizationMemberships OrganizationMember[]              @relation("MemberUser")
+  organizationAdminRoles  OrganizationAdmin[]               @relation("AdminUser")
+  eventAttendees          EventAttendee[]
+  organizationPosts       OrganizationPost[]
+  organizationSelections  OrganizationSelection[]
+  organizationHighlights  OrganizationHighlight[]
+  organizationActivities  OrganizationActivity[]
+  organizationPrograms    OrganizationProgram[]
+  organizationGallery     OrganizationGallery[]
+  highlightLikes          OrganizationHighlightLike[]
+  activityParticipants    OrganizationActivityParticipant[]
+
+  createdAt     DateTime        @default(now())
+  EventActivity EventActivity[]
+  playlists     Playlist[]
 
   @@map("users")
 }
@@ -75,13 +86,21 @@ model Post {
 }
 
 model Media {
-  id     String    @id @default(cuid())
+  id     String  @id @default(cuid())
   postId String?
-  post   Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
-  type   MediaType
-  url    String
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: SetNull)
 
-  createdAt DateTime @default(now())
+  orgPostId String?
+  orgPost   OrganizationPost? @relation(fields: [orgPostId], references: [id], onDelete: SetNull)
+
+  eventGallery EventGallery?
+
+  type                  MediaType
+  url                   String
+  organizationHighlight OrganizationHighlight? @relation(fields: [organizationHighlightId], references: [id]) // Add this line
+
+  createdAt               DateTime @default(now())
+  organizationHighlightId String?
 
   @@map("post_media")
 }
@@ -96,8 +115,12 @@ model Comment {
   content String
   userId  String
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId  String
-  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  orgPostId String?
+  orgPost   OrganizationPost? @relation(fields: [orgPostId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -105,13 +128,24 @@ model Comment {
 }
 
 model Like {
+  id     String @id @default(cuid())
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId String
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  postId String? // For general posts
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  orgPostId String? // For org posts
+  orgPost   OrganizationPost? @relation(fields: [orgPostId], references: [id], onDelete: Cascade)
+
+  songId String? // For songs
+  song   Song?   @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 
   @@unique([userId, postId])
-  @@map("likes")
+  @@unique([userId, orgPostId])
+  @@unique([userId, songId], name: "userId_songId")
 }
 
 model Bookmark {
@@ -147,4 +181,422 @@ enum NotificationType {
   LIKE
   FOLLOW
   COMMENT
+  ORGANIZATION_INVITE
+  ORGANIZATION_UPDATE
+}
+
+model Organization {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  logoUrl     String?
+  bannerUrl   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members    OrganizationMember[]
+  admins     OrganizationAdmin[]
+  posts      OrganizationPost[]
+  selections OrganizationSelection[]
+  highlights OrganizationHighlight[]
+  activities OrganizationActivity[]
+  programs   OrganizationProgram[]
+  gallery    OrganizationGallery[]
+  events     Event[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  userId         String
+  user           User         @relation("MemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  joinedAt       DateTime     @default(now())
+
+  @@unique([userId, organizationId])
+  @@map("organization_members")
+}
+
+model OrganizationAdmin {
+  userId         String
+  user           User         @relation("AdminUser", fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedAt     DateTime     @default(now())
+
+  @@unique([userId, organizationId])
+  @@map("organization_admins")
+}
+
+model OrganizationPost {
+  id             String       @id @default(cuid())
+  content        String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  attachments Media[]
+  likes       Like[]
+  comments    Comment[]
+
+  createdAt DateTime @default(now())
+
+  @@map("organization_posts")
+}
+
+model Event {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  category  String?
+  startDate DateTime
+  endDate   DateTime?
+
+  location String?
+  venue    String?
+  address  String?
+
+  coverPhotoUrl String?
+  logoUrl       String?
+
+  ticketType  TicketType?
+  ticketPrice Float?
+  ticketUrl   String?
+
+  programmeOverview String?
+  activities        EventActivity[]
+  gallery           EventGallery[]
+  attendees         EventAttendee[]
+
+  status      EventStatus @default(DRAFT)
+  isPublished Boolean     @default(false)
+
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  organizationProgram   OrganizationProgram? @relation(fields: [organizationProgramId], references: [id]) // Add this line
+  organizationProgramId String?
+
+  @@map("events")
+}
+
+model EventActivity {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime?
+  location    String?
+
+  createdAt DateTime @default(now())
+
+  @@map("event_activities")
+}
+
+model EventGallery {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  mediaId String @unique // Add @unique here
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  caption String?
+
+  createdAt DateTime @default(now())
+
+  @@map("event_gallery")
+}
+
+model EventAttendee {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status     AttendeeStatus
+  ticketCode String?
+
+  registeredAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@map("event_attendees")
+}
+
+enum TicketType {
+  FREE
+  PAID
+  DONATION
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum AttendeeStatus {
+  REGISTERED
+  CONFIRMED
+  ATTENDED
+  CANCELLED
+}
+
+model Song {
+  id        String   @id @default(cuid())
+  title     String
+  artist    String
+  genre     String?
+  duration  Int?
+  lyrics    String?
+  audioUrl  String?
+  sheetMusicUrl String?
+  coverUrl  String?
+  createdAt DateTime @default(now())
+
+  selections SongSelection[]
+  likes      Like[]
+  playlists  PlaylistSong[]
+
+  @@map("songs")
+}
+
+model Playlist {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  coverUrl    String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songs       PlaylistSong[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("playlists")
+}
+
+model PlaylistSong {
+  id         String   @id @default(cuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  songId     String
+  song       Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  addedAt    DateTime @default(now())
+
+  @@unique([playlistId, songId])
+  @@map("playlist_songs")
+}
+
+model OrganizationSelection {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  purpose        String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId String // Admin who created it
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  songs SongSelection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("organization_selections")
+}
+
+model SongSelection {
+  id          String                @id @default(cuid())
+  selectionId String
+  selection   OrganizationSelection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+
+  songId String
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  order Int
+
+  @@unique([selectionId, songId])
+  @@map("song_selections")
+}
+
+model OrganizationHighlight {
+  id             String        @id @default(cuid())
+  title          String
+  content        String
+  excerpt        String?
+  type           HighlightType
+  category       String?
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId String // Author
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  featured  Boolean @default(false)
+  published Boolean @default(true)
+
+  likes       OrganizationHighlightLike[]
+  attachments Media[]
+  gallery     OrganizationGallery[] // Relation back to gallery
+
+  // New Relations
+  activityId String?
+  activity   OrganizationActivity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+
+  programId String?
+  program   OrganizationProgram? @relation(fields: [programId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("organization_highlights")
+}
+
+model OrganizationHighlightLike {
+  id          String                @id @default(cuid())
+  userId      String
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  highlightId String
+  highlight   OrganizationHighlight @relation(fields: [highlightId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, highlightId])
+  @@map("organization_highlight_likes")
+}
+
+enum HighlightType {
+  ARTICLE
+  STORY
+  MEMBER_MENTION
+  ANNOUNCEMENT
+  NEWS
+}
+
+model OrganizationActivity {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  type           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId String // Creator
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  startDate DateTime
+  endDate   DateTime?
+  location  String?
+  capacity  Int?
+
+  participants OrganizationActivityParticipant[]
+  highlights   OrganizationHighlight[] // Relation back to highlights
+  gallery      OrganizationGallery[]   // Relation back to gallery
+
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  organizationProgram   OrganizationProgram? @relation(fields: [organizationProgramId], references: [id])
+  organizationProgramId String?
+
+  @@map("organization_activities")
+}
+
+model OrganizationActivityParticipant {
+  id         String               @id @default(cuid())
+  userId     String
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityId String
+  activity   OrganizationActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  status ParticipantStatus @default(REGISTERED)
+
+  registeredAt DateTime @default(now())
+
+  @@unique([userId, activityId])
+  @@map("organization_activity_participants")
+}
+
+enum ParticipantStatus {
+  REGISTERED
+  CONFIRMED
+  ATTENDED
+  CANCELLED
+}
+
+model OrganizationProgram {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  category       String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId String // Creator
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  startDate DateTime?
+  endDate   DateTime?
+  status    ProgramStatus @default(DRAFT)
+
+  events     Event[]
+  activities OrganizationActivity[]
+  highlights OrganizationHighlight[] // Relation back to highlights
+  gallery    OrganizationGallery[]   // Relation back to gallery
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("organization_programs")
+}
+
+enum ProgramStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model OrganizationGallery {
+  id             String       @id @default(cuid())
+  title          String?
+  caption        String?
+  type           MediaType
+  url            String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId String // Uploader
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tags String[]
+
+  // New Relations
+  activityId String?
+  activity   OrganizationActivity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+
+  programId String?
+  program   OrganizationProgram? @relation(fields: [programId], references: [id], onDelete: SetNull)
+
+  highlightId String?
+  highlight   OrganizationHighlight? @relation(fields: [highlightId], references: [id], onDelete: SetNull) // Optional link to a highlight
+
+  createdAt DateTime @default(now())
+
+  @@map("organization_gallery")
 }

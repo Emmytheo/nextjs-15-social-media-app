@@ -8,7 +8,9 @@ export default function useInitializeChatClient() {
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
 
   useEffect(() => {
-    const client = StreamChat.getInstance(process.env.NEXT_PUBLIC_STREAM_KEY!);
+    const client = StreamChat.getInstance(process.env.NEXT_PUBLIC_STREAM_KEY!, {
+      timeout: 10000, // 10 seconds timeout instead of default 3 seconds
+    });
 
     client
       .connectUser(

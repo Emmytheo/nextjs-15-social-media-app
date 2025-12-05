@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import UserAvatar from "@/components/UserAvatar";
 import useDebounce from "@/hooks/useDebounce";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Check, Loader2, SearchIcon, X } from "lucide-react";
+import { Check, Loader2, Search, X } from "lucide-react";
 import { useState } from "react";
 import { UserResponse } from "stream-chat";
 import { DefaultStreamChatGenerics, useChatContext } from "stream-chat-react";
@@ -47,11 +47,11 @@ export default function NewChatDialog({
           role: { $ne: "admin" },
           ...(searchInputDebounced
             ? {
-                $or: [
-                  { name: { $autocomplete: searchInputDebounced } },
-                  { username: { $autocomplete: searchInputDebounced } },
-                ],
-              }
+              $or: [
+                { name: { $autocomplete: searchInputDebounced } },
+                { username: { $autocomplete: searchInputDebounced } },
+              ],
+            }
             : {}),
         },
         { name: 1, username: 1 },
@@ -66,8 +66,8 @@ export default function NewChatDialog({
         name:
           selectedUsers.length > 1
             ? loggedInUser.displayName +
-              ", " +
-              selectedUsers.map((u) => u.name).join(", ")
+            ", " +
+            selectedUsers.map((u) => u.name).join(", ")
             : undefined,
       });
       await channel.create();
@@ -94,7 +94,7 @@ export default function NewChatDialog({
         </DialogHeader>
         <div>
           <div className="group relative">
-            <SearchIcon className="absolute left-5 top-1/2 size-5 -translate-y-1/2 transform text-muted-foreground group-focus-within:text-primary" />
+            <Search className="absolute left-5 top-1/2 size-5 -translate-y-1/2 transform text-muted-foreground group-focus-within:text-primary" />
             <input
               placeholder="Search users..."
               className="h-12 w-full pe-4 ps-14 focus:outline-none"

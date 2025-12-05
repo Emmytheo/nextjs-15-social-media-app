@@ -28,6 +28,7 @@ export default function SignUpForm() {
       email: "",
       username: "",
       password: "",
+      invitationCode: "",
     },
   });
 
@@ -66,6 +67,22 @@ export default function SignUpForm() {
                 <Input placeholder="Email" type="email" {...field} />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="invitationCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Invitation Code</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter invitation code" {...field} />
+              </FormControl>
+              <FormMessage />
+              <p className="text-xs text-muted-foreground">
+                Contact an administrator for an invitation code
+              </p>
             </FormItem>
           )}
         />

@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import { useSession } from "@/app/(main)/SessionProvider";
 import LoadingButton from "@/components/LoadingButton";
@@ -9,7 +9,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useDropzone } from "@uploadthing/react";
-import { ImageIcon, Loader2, X } from "lucide-react";
+import { Image as LucideImage, Loader2, X } from "lucide-react";
 import Image from "next/image";
 import { ClipboardEvent, useRef } from "react";
 import { useSubmitPostMutation } from "./mutations";
@@ -37,6 +37,7 @@ export default function PostEditor() {
   const { onClick, ...rootProps } = getRootProps();
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bold: false,
@@ -54,6 +55,7 @@ export default function PostEditor() {
     }) || "";
 
   function onSubmit() {
+
     mutation.mutate(
       {
         content: input,
@@ -141,7 +143,7 @@ function AddAttachmentsButton({
         disabled={disabled}
         onClick={() => fileInputRef.current?.click()}
       >
-        <ImageIcon size={20} />
+        <LucideImage size={20} />
       </Button>
       <input
         type="file"

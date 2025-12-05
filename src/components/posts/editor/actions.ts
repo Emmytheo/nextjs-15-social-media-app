@@ -9,6 +9,7 @@ export async function submitPost(input: {
   content: string;
   mediaIds: string[];
 }) {
+  
   const { user } = await validateRequest();
 
   if (!user) throw new Error("Unauthorized");
@@ -25,6 +26,8 @@ export async function submitPost(input: {
     },
     include: getPostDataInclude(user.id),
   });
+
+  
 
   return newPost;
 }

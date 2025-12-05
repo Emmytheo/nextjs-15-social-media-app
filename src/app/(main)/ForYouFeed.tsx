@@ -8,6 +8,8 @@ import { PostsPage } from "@/lib/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
+import OrganizationHighlights from "@/components/OrganizationHighlights";
+
 export default function ForYouFeed() {
   const {
     data,
@@ -37,9 +39,12 @@ export default function ForYouFeed() {
 
   if (status === "success" && !posts.length && !hasNextPage) {
     return (
-      <p className="text-center text-muted-foreground">
-        No one has posted anything yet.
-      </p>
+      <div className="space-y-5">
+        <OrganizationHighlights />
+        <p className="text-center text-muted-foreground">
+          No one has posted anything yet.
+        </p>
+      </div>
     );
   }
 
@@ -56,6 +61,7 @@ export default function ForYouFeed() {
       className="space-y-5"
       onBottomReached={() => hasNextPage && !isFetching && fetchNextPage()}
     >
+      <OrganizationHighlights />
       {posts.map((post) => (
         <Post key={post.id} post={post} />
       ))}

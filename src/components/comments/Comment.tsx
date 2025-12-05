@@ -38,7 +38,7 @@ export default function Comment({ comment }: CommentProps) {
         </div>
         <div>{comment.content}</div>
       </div>
-      {comment.user.id === user.id && (
+      {comment.user.id === user?.id && (
         <CommentMoreButton
           comment={comment}
           className="ms-auto opacity-0 transition-opacity group-hover/comment:opacity-100"

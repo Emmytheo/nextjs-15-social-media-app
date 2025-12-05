@@ -9,6 +9,7 @@ export const signUpSchema = z.object({
     "Only letters, numbers, - and _ allowed",
   ),
   password: requiredString.min(8, "Must be at least 8 characters"),
+  invitationCode: requiredString,
 });
 
 export type SignUpValues = z.infer<typeof signUpSchema>;
@@ -34,4 +35,17 @@ export type UpdateUserProfileValues = z.infer<typeof updateUserProfileSchema>;
 
 export const createCommentSchema = z.object({
   content: requiredString,
+});
+
+export const createOrganizationPostSchema = z.object({
+  content: requiredString,
+  attachments: z.array(z.object({
+    type: z.enum(["IMAGE", "VIDEO"]),
+    url: z.string(),
+  })).optional(),
+});
+
+export const editOrganizationSchema = z.object({
+  name: requiredString,
+  description: z.string().max(1000, "Must be at most 1000 characters"),
 });

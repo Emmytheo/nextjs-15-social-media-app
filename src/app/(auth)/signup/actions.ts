@@ -14,7 +14,18 @@ export async function signUp(
   credentials: SignUpValues,
 ): Promise<{ error: string }> {
   try {
-    const { username, email, password } = signUpSchema.parse(credentials);
+    const { username, email, password, invitationCode } = signUpSchema.parse(credentials);
+
+    // Validate invitation code
+    const validCodes = process.env.INVITATION_CODES?.split(',').map(code => code.trim()) || [];
+    
+    if (validCodes.length === 0) {
+      return { error: "Signup is currently disabled. Please contact an administrator." };
+    }
+    
+    if (!validCodes.includes(invitationCode)) {
+      return { error: "Invalid invitation code. Please contact an administrator for access." };
+    }
 
     const passwordHash = await hash(password, {
       memoryCost: 19456,

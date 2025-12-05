@@ -55,6 +55,7 @@ export default function FollowButton({
 
   return (
     <Button
+    className="text-xs px-3 py-1 h-fit"
       variant={data.isFollowedByUser ? "secondary" : "default"}
       onClick={() => mutate()}
     >

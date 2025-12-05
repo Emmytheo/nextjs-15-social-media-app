@@ -15,6 +15,8 @@ import UserTooltip from "../UserTooltip";
 import BookmarkButton from "./BookmarkButton";
 import LikeButton from "./LikeButton";
 import PostMoreButton from "./PostMoreButton";
+import { Splide, SplideSlide } from "@splidejs/react-splide";
+import "@splidejs/react-splide/css";
 
 interface PostProps {
   post: PostData;
@@ -52,7 +54,7 @@ export default function Post({ post }: PostProps) {
             </Link>
           </div>
         </div>
-        {post.user.id === user.id && (
+        {post.user.id === user?.id && (
           <PostMoreButton
             post={post}
             className="opacity-0 transition-opacity group-hover/post:opacity-100"
@@ -72,7 +74,7 @@ export default function Post({ post }: PostProps) {
             postId={post.id}
             initialState={{
               likes: post._count.likes,
-              isLikedByUser: post.likes.some((like) => like.userId === user.id),
+              isLikedByUser: post.likes.some((like) => like.userId === user?.id),
             }}
           />
           <CommentButton
@@ -83,8 +85,8 @@ export default function Post({ post }: PostProps) {
         <BookmarkButton
           postId={post.id}
           initialState={{
-            isBookmarkedByUser: post.bookmarks.some(
-              (bookmark) => bookmark.userId === user.id,
+            isBookmarkedByUser: post.bookmarks && post.bookmarks.some(
+              (bookmark) => bookmark.userId === user?.id,
             ),
           }}
         />
@@ -100,15 +102,26 @@ interface MediaPreviewsProps {
 
 function MediaPreviews({ attachments }: MediaPreviewsProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-3",
-        attachments.length > 1 && "sm:grid sm:grid-cols-2",
-      )}
-    >
-      {attachments.map((m) => (
-        <MediaPreview key={m.id} media={m} />
-      ))}
+    <div className={cn("flex w-full")}>
+      <div className="flex md:hidden">
+        <Splide options={{ rewind: true, arrows: false, loop: true }}>
+          {attachments.map((m) => (
+            <SplideSlide key={m.id}>
+              <MediaPreview media={m} />
+            </SplideSlide>
+          ))}
+        </Splide>
+      </div>
+      <div
+        className={cn(
+          "hidden w-full gap-3 md:grid md:flex-col",
+          attachments.length > 1 && "sm:grid sm:grid-cols-2",
+        )}
+      >
+        {attachments.map((m) => (
+          <MediaPreview key={m.id} media={m} />
+        ))}
+      </div>
     </div>
   );
 }

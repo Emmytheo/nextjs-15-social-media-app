@@ -1,3 +1,5 @@
+// "use client";
+
 import { useSession } from "@/app/(main)/SessionProvider";
 import { useToast } from "@/components/ui/use-toast";
 import { PostsPage } from "@/lib/types";
@@ -17,7 +19,10 @@ export function useSubmitPostMutation() {
   const { user } = useSession();
 
   const mutation = useMutation({
-    mutationFn: submitPost,
+    mutationFn: (input: { content: string; mediaIds: string[] }) => {
+      // console.log(input);
+      return submitPost(input);
+    },
     onSuccess: async (newPost) => {
       const queryFilter = {
         queryKey: ["post-feed"],

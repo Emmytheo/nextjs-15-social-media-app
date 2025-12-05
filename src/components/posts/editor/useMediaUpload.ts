@@ -21,7 +21,7 @@ export default function useMediaUpload() {
         const extension = file.name.split(".").pop();
         return new File(
           [file],
-          `attachment_${crypto.randomUUID()}.${extension}`,
+          `attachment_${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}.${extension}`,
           {
             type: file.type,
           },
