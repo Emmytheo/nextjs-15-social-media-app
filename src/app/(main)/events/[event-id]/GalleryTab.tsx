@@ -222,7 +222,7 @@ export default function GalleryTab({ eventId }: GalleryTabProps) {
               <Camera className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h4 className="text-lg font-semibold mb-2">No Media Yet</h4>
               <p className="text-muted-foreground">
-                Photos and videos from the event will appear here once they're uploaded.
+                Photos and videos from the event will appear here once they&apos;re uploaded.
               </p>
             </div>
           )}

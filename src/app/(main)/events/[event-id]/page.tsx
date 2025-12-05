@@ -102,7 +102,7 @@ export default async function Page({
   if (!loggedInUser) {
     return (
       <p className="text-destructive">
-        You're not authorized to view this page.
+        You&apos;re not authorized to view this page.
       </p>
     );
   }
