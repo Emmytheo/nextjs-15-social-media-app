@@ -139,7 +139,7 @@ export default async function SongPage({ params }: SongPageProps) {
                             </TabsList>
                             <TabsContent value="sheet" className="flex-1 mt-4 overflow-y-auto">
                               <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full flex flex-col">
-                                <div className="p-6 flex-1">
+                                <div className="p-2 md:p-6 flex-1">
                                   {song.sheetMusicUrl ? (
                                     <iframe
                                       src={`${song.sheetMusicUrl}#toolbar=0`}

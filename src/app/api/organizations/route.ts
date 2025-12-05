@@ -54,7 +54,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function GETOrganizationPosts(
+async function GETOrganizationPosts(
   request: Request,
   { params }: { params: { orgId: string } },
 ) {
@@ -112,7 +112,7 @@ export async function GETOrganizationPosts(
   }
 }
 
-export async function GETOrganizationMembers(
+async function GETOrganizationMembers(
   request: Request,
   { params }: { params: { orgId: string } },
 ) {
@@ -146,7 +146,7 @@ export async function GETOrganizationMembers(
   }
 }
 
-export async function POSTOrganizationPost(
+async function POSTOrganizationPost(
   request: Request,
   { params }: { params: { orgId: string } },
 ) {
