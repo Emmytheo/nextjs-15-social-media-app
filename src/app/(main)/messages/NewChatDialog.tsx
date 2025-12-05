@@ -40,8 +40,11 @@ export default function NewChatDialog({
 
   const { data, isFetching, isError, isSuccess } = useQuery({
     queryKey: ["stream-users", searchInputDebounced],
-    queryFn: async () =>
-      client.queryUsers(
+    queryFn: async () => {
+      if (!loggedInUser) {
+        return { users: [] };
+      }
+      return client.queryUsers(
         {
           id: { $ne: loggedInUser.id },
           role: { $ne: "admin" },
@@ -56,11 +59,16 @@ export default function NewChatDialog({
         },
         { name: 1, username: 1 },
         { limit: 15 },
-      ),
+      );
+    },
+    enabled: !!loggedInUser,
   });
 
   const mutation = useMutation({
     mutationFn: async () => {
+      if (!loggedInUser) {
+        throw new Error("User not logged in");
+      }
       const channel = client.channel("messaging", {
         members: [loggedInUser.id, ...selectedUsers.map((u) => u.id)],
         name:
@@ -85,6 +93,10 @@ export default function NewChatDialog({
       });
     },
   });
+
+  if (!loggedInUser) {
+    return null;
+  }
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
