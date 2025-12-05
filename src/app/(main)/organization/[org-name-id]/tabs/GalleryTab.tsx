@@ -53,9 +53,7 @@ export function GalleryTab({ organization, isAdmin }: GalleryTabProps) {
 
         <TabsContent value="photos" className="mt-6">
           <div className="space-y-6">
-            <p className="text-sm text-muted-foreground">
-              Capture and share memorable moments from {organization.name}'s events and activities.
-            </p>
+            Capture and share memorable moments from {organization.name}&apos;s events and activities.
 
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

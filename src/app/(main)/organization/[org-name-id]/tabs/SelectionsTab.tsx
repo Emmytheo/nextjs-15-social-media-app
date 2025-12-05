@@ -21,9 +21,7 @@ export function SelectionsTab({ organization, isAdmin }: SelectionsTabProps) {
         {isAdmin && <CreateOrganizationSelectionForm organizationId={organization.id} />}
       </div>
       <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Curated song selections for {organization.name}'s members to use in performances, practices, and events.
-        </p>
+        Curated song selections for {organization.name}&apos;s members to use in performances, practices, and events.
         <OrganizationSelectionsFeed organization={organization} />
       </div>
     </div>

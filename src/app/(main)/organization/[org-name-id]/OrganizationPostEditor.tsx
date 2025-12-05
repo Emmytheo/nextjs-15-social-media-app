@@ -19,7 +19,7 @@ interface OrganizationPostEditorProps {
 export default function OrganizationPostEditor({ organizationId }: OrganizationPostEditorProps) {
   const { user } = useSession();
 
-  if (!user) return null;
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isPending, setIsPending] = useState(false);
@@ -69,6 +69,8 @@ export default function OrganizationPostEditor({ organizationId }: OrganizationP
       setIsPending(false);
     }
   }
+
+  if (!user) return null;
 
   return (
     <div className="flex flex-col gap-5 rounded-2xl bg-card p-5">

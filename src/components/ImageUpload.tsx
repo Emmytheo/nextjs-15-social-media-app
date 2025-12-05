@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "./ui/button";
 import { Upload } from "lucide-react";
+import Image from "next/image";
 import { toast } from "./ui/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
 
@@ -53,11 +54,14 @@ export function ImageUpload({ value, onChange, endpoint }: ImageUploadProps) {
     >
       <input {...getInputProps()} />
       {value ? (
-        <img
-          src={value}
-          alt="Uploaded"
-          className="max-h-48 max-w-full object-contain"
-        />
+        <div className="relative h-48 w-full">
+          <Image
+            src={value}
+            alt="Uploaded"
+            fill
+            className="object-contain"
+          />
+        </div>
       ) : (
         <>
           <Upload className="h-8 w-8 mb-2" />
