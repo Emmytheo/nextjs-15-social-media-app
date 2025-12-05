@@ -51,7 +51,7 @@ export default async function CreateEventPage({
             Access Denied
           </h1>
           <p className="text-muted-foreground">
-            You don't have permission to create events for this organization.
+            You don&apos;t have permission to create events for this organization.
           </p>
         </div>
       </div>

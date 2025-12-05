@@ -76,7 +76,7 @@ export function OrganizationFeed({ organization, isAdmin }: OrganizationFeedProp
         </div>
         <h3 className="text-lg font-semibold mb-1">No posts yet</h3>
         <p className="text-muted-foreground max-w-sm mb-6">
-          This organization hasn't posted anything yet. Stay tuned for updates!
+          This organization hasn&apos;t posted anything yet. Stay tuned for updates!
         </p>
         {isAdmin && (
           <>

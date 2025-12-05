@@ -146,7 +146,7 @@ export function CreateGalleryItemForm({ organizationId }: CreateGalleryItemFormP
                 <DialogHeader>
                     <DialogTitle>Add to Gallery</DialogTitle>
                     <DialogDescription>
-                        Upload photos or videos to your organization's gallery.
+                        Upload photos or videos to your organization&apos;s gallery.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>

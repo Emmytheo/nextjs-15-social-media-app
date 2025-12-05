@@ -89,7 +89,7 @@ export function CreateOrganizationSelectionForm({ organizationId }: CreateOrgani
         <DialogHeader>
           <DialogTitle>Create Song Selection</DialogTitle>
           <DialogDescription>
-            Create a curated song selection for your organization's members.
+            Create a curated song selection for your organization&apos;s members.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
