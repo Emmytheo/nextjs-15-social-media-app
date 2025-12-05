@@ -3,6 +3,35 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
     Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs-new";
+
+import { SongArtwork } from "@/app/(admin)/music/components/song-artwork";
+import { SelectionsTab } from "@/app/(admin)/music/components/SelectionsTab";
+import { SearchInput } from "@/app/(admin)/music/components/SearchInput";
+import { GenreSelect } from "@/app/(admin)/music/components/GenreSelect";
+import { getSongs, getRecentSongs, getOrganizationSelections } from "@/app/(admin)/music/actions";
+import { playlists as categories } from "@/app/(admin)/music/data/playlists";
+
+export const metadata: Metadata = {
+    title: "Music Preview",
+};
+
+export const dynamic = "force-dynamic";
+
+interface PreviewPageProps {
+    searchParams: {
+        q?: string;
+        genre?: string;
+    };
+}
+
+export default async function PreviewPage({ searchParams }: PreviewPageProps) {
+    const songs = await getSongs(searchParams.q, searchParams.genre);
+    const recentSongs = await getRecentSongs(10);
+    const selections = await getOrganizationSelections();
 
     return (
         <div className="border-t">
