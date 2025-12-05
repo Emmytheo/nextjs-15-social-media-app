@@ -80,13 +80,17 @@ export function OrganizationFeed({ organization, isAdmin }: OrganizationFeedProp
         </p>
         {isAdmin && (
           <>
-            <Button onClick={() => document.getElementById('add-post-trigger')?.click()}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create First Post
-            </Button>
-            <div className="hidden">
-              <OrganizationPostEditor organizationId={organization.id} />
-            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create First Post
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-transparent border-0">
+                <OrganizationPostEditor organizationId={organization.id} />
+              </DialogContent>
+            </Dialog>
           </>
         )}
       </div>
