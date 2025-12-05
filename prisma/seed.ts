@@ -606,6 +606,7 @@ async function main() {
     data: [
       {
         eventId: event1.id,
+        userId: user1.id,
         title: "Opening Keynote: AI Revolution",
         description:
           "Dr. Emily Carter presents groundbreaking research on AI advancements and their societal implications.",
@@ -615,6 +616,7 @@ async function main() {
       },
       {
         eventId: event1.id,
+        userId: user1.id,
         title: "Workshop: Building AI Applications",
         description:
           "Hands-on workshop teaching practical AI development using modern frameworks and tools.",
@@ -624,6 +626,7 @@ async function main() {
       },
       {
         eventId: event2.id,
+        userId: user2.id,
         title: "Community Leaders Roundtable",
         description:
           "Local leaders discuss community challenges and success stories with festival attendees.",

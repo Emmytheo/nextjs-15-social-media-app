@@ -47,7 +47,7 @@ export function SelectionCard({ selection, baseRoute = "/music" }: SelectionCard
           </Button>
         </div>
       </div>
-      <div className="p-6 pt-0">
+      <div className="p-3 md:p-6 pt-0">
         <ScrollArea className="h-[300px] pr-4 overflow-x-auto">
           <div className="space-y-2">
             {selection.songs.length > 0 ? (
