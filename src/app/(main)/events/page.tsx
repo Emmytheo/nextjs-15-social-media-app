@@ -52,7 +52,7 @@ interface GetEventsParams {
   organizationId?: string | null;
 }
 
-export async function getEvents({ organizationId }: GetEventsParams): Promise<EventWithOrg[]> {
+async function getEvents({ organizationId }: GetEventsParams): Promise<EventWithOrg[]> {
   return ky
     .get("/api/events", {
       ...(organizationId && {
@@ -83,21 +83,21 @@ export default function EventsPage() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Events</h1>
         <div className="flex items-center gap-2">
-            <div className="relative w-full sm:w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                placeholder="Search events..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
-            <Button asChild className="hidden md:flex">
-                <Link href="/events/create">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Event
-                </Link>
-            </Button>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search events..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button asChild className="hidden md:flex">
+            <Link href="/events/create">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Event
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -121,9 +121,9 @@ export default function EventsPage() {
         </div>
       ) : !filteredEvents || filteredEvents.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-            <Calendar className="h-12 w-12 mb-4 opacity-20" />
-            <p className="text-lg font-medium">No events found</p>
-            <p className="text-sm">Try adjusting your search query.</p>
+          <Calendar className="h-12 w-12 mb-4 opacity-20" />
+          <p className="text-lg font-medium">No events found</p>
+          <p className="text-sm">Try adjusting your search query.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -145,37 +145,37 @@ export default function EventsPage() {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-secondary/50 text-muted-foreground">
-                        <Calendar className="h-12 w-12 opacity-20" />
+                      <Calendar className="h-12 w-12 opacity-20" />
                     </div>
                   )}
                   {event.startDate && (
                     <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm rounded-md px-2 py-1 text-xs font-semibold shadow-sm">
-                        {formatDate(event.startDate, "MMM d")}
+                      {formatDate(event.startDate, "MMM d")}
                     </div>
                   )}
                 </div>
                 <div className="p-5 flex flex-col flex-1 gap-3">
                   <div>
                     <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
-                        {event.title}
+                      {event.title}
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                        {event.organization.name}
+                      {event.organization.name}
                     </p>
                   </div>
-                  
+
                   <div className="mt-auto space-y-2 text-sm text-muted-foreground">
                     {event.venue && (
-                        <div className="flex items-center gap-2">
-                            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span className="truncate">{event.venue}</span>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span className="truncate">{event.venue}</span>
+                      </div>
                     )}
                     {event.startDate && (
-                        <div className="flex items-center gap-2">
-                            <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span>{formatDate(event.startDate, "t")}</span>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span>{formatDate(event.startDate, "t")}</span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -184,7 +184,7 @@ export default function EventsPage() {
           ))}
         </div>
       )}
-      
+
       <FloatingActionButton href="/events/create" label="Create Event" />
     </div>
   );
