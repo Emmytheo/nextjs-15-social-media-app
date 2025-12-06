@@ -105,11 +105,11 @@ export function OrganizationSelectionsFeed({ organization }: OrganizationSelecti
 
   return (
     <InfiniteScrollContainer
-      className="space-y-5"
+      className="space-y-5 mt-2"
       onBottomReached={() => hasNextPage && !isFetching && fetchNextPage()}
     >
       {selections.map((selection) => (
-        <Card key={selection.id} className="overflow-hidden">
+        <Card key={selection.id} className="overflow-hidden text-xs md:text-sm p-0 md:p-2">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
@@ -131,11 +131,11 @@ export function OrganizationSelectionsFeed({ organization }: OrganizationSelecti
             )}
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-3 text-xs md:text-sm">
               {selection.songs.slice(0, 3).map((songEntry, index) => (
                 <div key={songEntry.song.id} className="flex items-center gap-3 p-2 rounded-lg border">
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
-                    <span className="text-sm font-medium">{songEntry.order}</span>
+                    <span className="text-xs md:text-sm font-medium">{songEntry.order}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{songEntry.song.title}</p>

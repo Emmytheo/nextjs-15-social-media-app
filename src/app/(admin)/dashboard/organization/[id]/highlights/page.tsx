@@ -18,7 +18,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Star } from "lucide-react";
+import { Edit, MoreHorizontal, Star, Trash } from "lucide-react";
 import { formatDate } from "date-fns";
 import Link from "next/link";
 import { CreateOrganizationHighlightForm } from "@/app/(main)/organization/[org-name-id]/CreateOrganizationHighlightForm";
@@ -151,7 +151,8 @@ export default async function Page({ params }: PageProps) {
                                                         View Details
                                                     </Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem>Edit Highlight</DropdownMenuItem>
+                                                <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                <DropdownMenuItem><Trash className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>

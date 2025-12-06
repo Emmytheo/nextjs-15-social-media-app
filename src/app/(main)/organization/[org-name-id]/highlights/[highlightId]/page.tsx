@@ -8,56 +8,51 @@ import { ArrowLeft, Edit, Calendar, User, Heart } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "date-fns";
 import Image from "next/image";
+import { OrganizationHighlightForm } from "../../OrganizationHighlightForm";
+
+import { getOrganizationHighlightInclude } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+
 
 interface PageProps {
-    params: Promise<{ id: string; highlightId: string }>;
+    params: Promise<{ "org-name-id": string; highlightId: string }>;
 }
 
 export default async function Page({ params }: PageProps) {
-    const { user } = await validateRequest();
-    if (!user) redirect("/login");
+    const { user } = await validateRequest(); // Optional auth for public access
 
-    const { id, highlightId } = await params;
+    const { "org-name-id": orgNameOrId, highlightId } = await params;
 
     const highlight = await prisma.organizationHighlight.findUnique({
         where: { id: highlightId },
         include: {
-            user: {
-                select: {
-                    displayName: true,
-                    username: true,
-                    avatarUrl: true,
-                    id: true
-                },
-            },
-            activity: {
-                select: { id: true, title: true },
-            },
-            program: {
-                select: { id: true, title: true },
-            },
-            attachments: true,
-            _count: {
-                select: {
-                    likes: true,
-                },
+            ...getOrganizationHighlightInclude(user?.id || ""),
+            organization: {
+                include: {
+                    admins: {
+                        select: { userId: true }
+                    }
+                }
             },
         },
     });
 
-    if (!highlight) redirect(`/dashboard/organization/${id}/highlights`);
+    if (!highlight) redirect(`/organization/${orgNameOrId}/tabs/highlights`);
+
+    const isAdmin = user ? highlight.organization.admins.some(a => a.userId === user.id) : false;
 
     return (
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex flex-1 flex-col gap-5 p-1 md:p-5 pt-0">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/dashboard/organization/${id}/highlights`}>
+                    <Link href={`/organization/${orgNameOrId}/tabs/highlights`}>
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-2xl font-bold tracking-tight">{highlight.title}</h2>
+                        <h2 className="text-lg md:text-2xl font-bold tracking-tight">{highlight.title}</h2>
                         {highlight.featured && (
                             <Badge variant="secondary">Featured</Badge>
                         )}
@@ -71,10 +66,28 @@ export default async function Page({ params }: PageProps) {
                         <span>{formatDate(highlight.createdAt, "MMM d, yyyy")}</span>
                     </div>
                 </div>
-                <Button variant="outline" size="sm">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                </Button>
+                {isAdmin && (
+                    <OrganizationHighlightForm
+                        organizationId={highlight.organization.id}
+                        highlightToEdit={highlight}
+                        trigger={
+                            <Button
+                                variant="default"
+                                size="icon"
+                                className={cn(
+                                    "fixed bottom-4 right-4 z-50 rounded-full shadow-lg",
+                                    "md:static md:z-auto md:shadow-none md:rounded-md",
+                                    "md:h-9 md:w-auto md:px-3",
+                                    "md:bg-background md:text-foreground md:border md:border-input",
+                                    "md:hover:bg-accent md:hover:text-accent-foreground"
+                                )}
+                            >
+                                <Edit className="h-5 w-5 md:mr-2 md:h-4 md:w-4" />
+                                <span className="sr-only md:not-sr-only md:inline-block">Edit</span>
+                            </Button>
+                        }
+                    />
+                )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -138,7 +151,7 @@ export default async function Page({ params }: PageProps) {
                                 <span className="text-sm font-medium">Related To</span>
                                 {highlight.program ? (
                                     <Link
-                                        href={`/dashboard/organization/${id}/programs/${highlight.program.id}`}
+                                        href={`/organization/${orgNameOrId}/programs/${highlight.program.id}`}
                                         className="flex items-center justify-between p-2 rounded-md border hover:bg-muted/50 transition-colors"
                                     >
                                         <span className="text-sm">Program</span>
@@ -153,7 +166,7 @@ export default async function Page({ params }: PageProps) {
 
                                 {highlight.activity ? (
                                     <Link
-                                        href={`/dashboard/organization/${id}/activities/${highlight.activity.id}`}
+                                        href={`/organization/${orgNameOrId}/activities/${highlight.activity.id}`}
                                         className="flex items-center justify-between p-2 rounded-md border hover:bg-muted/50 transition-colors"
                                     >
                                         <span className="text-sm">Activity</span>

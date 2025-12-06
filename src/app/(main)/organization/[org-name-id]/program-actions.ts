@@ -72,3 +72,48 @@ export async function createOrganizationProgram(organizationId: string, input: {
 
   return createdProgram;
 }
+
+export async function updateOrganizationProgram(
+  programId: string,
+  input: {
+    title: string;
+    description?: string;
+    category?: string;
+    startDate?: Date;
+    endDate?: Date;
+    status?: ProgramStatus;
+  }
+) {
+  const { user } = await validateRequest();
+
+  if (!user) throw new Error("Unauthorized");
+
+  const program = await prisma.organizationProgram.findUnique({
+    where: { id: programId },
+    include: {
+      organization: {
+        include: {
+          admins: {
+            where: { userId: user.id },
+          },
+        },
+      },
+    },
+  });
+
+  if (!program) throw new Error("Program not found");
+
+  const isAdmin = program.organization.admins.length > 0;
+
+  if (!isAdmin) throw new Error("Access denied");
+
+  const updatedProgram = await prisma.organizationProgram.update({
+    where: { id: programId },
+    data: {
+        ...input
+    },
+    include: getOrganizationProgramInclude(user.id),
+  });
+
+  return updatedProgram;
+}

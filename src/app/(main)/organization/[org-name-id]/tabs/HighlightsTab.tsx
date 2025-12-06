@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import ky from "@/lib/ky";
 import { OrganizationWithCounts } from "../page";
+import { OrganizationHighlightsPage } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,9 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import kyInstance from "@/lib/ky";
 import { formatDate } from "date-fns";
-import { CreateOrganizationHighlightForm } from "../CreateOrganizationHighlightForm";
+import { OrganizationHighlightForm } from "../OrganizationHighlightForm";
+import { Link as LucideLink } from "lucide-react";
+import Link from "next/link";
 
 interface HighlightsTabProps {
   organization: OrganizationWithCounts;
@@ -37,7 +40,7 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
           `/api/organizations/${organization.id}/highlights`,
           pageParam ? { searchParams: { cursor: String(pageParam) } } : undefined
         )
-        .json<HighlightsPage>(),
+        .json<OrganizationHighlightsPage>(),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
@@ -48,12 +51,12 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
     return (
       <div className="rounded-2xl bg-card p-5">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
+          <h3 className="text-md md:text-lg font-semibold flex items-center gap-2">
             <Star className="w-5 h-5" />
             Featured Content & Highlights
           </h3>
           <div className="flex items-center gap-2">
-            {isAdmin && <CreateOrganizationHighlightForm organizationId={organization.id} />}
+            {isAdmin && <OrganizationHighlightForm organizationId={organization.id} />}
           </div>
         </div>
         <div className="flex justify-center py-8">
@@ -66,7 +69,7 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
   return (
     <div className="rounded-2xl bg-card p-5">
       <div className="flex items-center justify-between mb-6 flex-wrap md:flex-nowrap gap-2">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+        <h3 className="text-md md:text-lg font-semibold flex items-center gap-2">
           <Star className="w-5 h-5" />
           Featured Content & Highlights
         </h3>
@@ -75,7 +78,7 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
             <TrendingUp className="w-4 h-4 mr-2" />
             View All
           </Button>
-          {isAdmin && <CreateOrganizationHighlightForm organizationId={organization.id} />}
+          {isAdmin && <OrganizationHighlightForm organizationId={organization.id} />}
         </div>
       </div>
 
@@ -158,7 +161,7 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
                   )}
                   {highlight.attachments && highlight.attachments.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
-                      {highlight.attachments.slice(0, 3).map((attachment, index) => (
+                      {highlight.attachments.slice(0, 3).map((attachment: { id: string | null | undefined; type: string; }, index: any) => (
                         <div key={attachment.id} className="aspect-video bg-muted rounded-lg overflow-hidden">
                           {/* Placeholder for image/video */}
                           <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
@@ -173,8 +176,10 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
                       <Heart className="w-4 h-4 mr-2" />
                       Like
                     </Button>
-                    <Button variant="ghost" size="sm">
-                      Read More
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/organization/${organization.id}/highlights/${highlight.id}`}>
+                        Read More
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -183,11 +188,11 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
           ) : (
             <Card className="p-8 text-center">
               <Star className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">No highlights yet</h3>
-              <p className="text-muted-foreground mb-4">
+              <h3 className="text-md md:text-lg font-semibold mb-2">No highlights yet</h3>
+              <p className="text-sm md:text-md text-muted-foreground mb-4">
                 Highlights will showcase important stories, achievements, and updates from {organization.name}.
               </p>
-              <CreateOrganizationHighlightForm organizationId={organization.id} />
+              <OrganizationHighlightForm organizationId={organization.id} />
             </Card>
           )}
 

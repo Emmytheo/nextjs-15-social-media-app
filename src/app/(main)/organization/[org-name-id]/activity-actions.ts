@@ -75,3 +75,51 @@ export async function createOrganizationActivity(organizationId: string, input: 
 
   return createdActivity;
 }
+
+export async function updateOrganizationActivity(
+  activityId: string,
+  input: {
+    title: string;
+    description?: string;
+    type: string;
+    startDate: Date;
+    endDate?: Date;
+    location?: string;
+    capacity?: number;
+    organizationProgramId?: string;
+  }
+) {
+  const { user } = await validateRequest();
+
+  if (!user) throw new Error("Unauthorized");
+
+  const activity = await prisma.organizationActivity.findUnique({
+    where: { id: activityId },
+    include: {
+      organization: {
+        include: {
+          admins: {
+            where: { userId: user.id },
+          },
+        },
+      },
+    },
+  });
+
+  if (!activity) throw new Error("Activity not found");
+
+  const isAdmin = activity.organization.admins.length > 0;
+
+  if (!isAdmin) throw new Error("Access denied");
+
+  const updatedActivity = await prisma.organizationActivity.update({
+    where: { id: activityId },
+    data: {
+      ...input,
+      endDate: input.endDate ?? null,
+    },
+    include: getOrganizationActivityInclude(user.id),
+  });
+
+  return updatedActivity;
+}

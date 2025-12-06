@@ -14,13 +14,13 @@ export function SelectionsTab({ organization, isAdmin }: SelectionsTabProps) {
   return (
     <div className="rounded-2xl bg-card p-5">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-lg font-semibold">
+        <h3 className="flex items-center gap-2 text-md md:text-lg font-semibold">
           <Music className="h-5 w-5" />
           Song Selections
         </h3>
         {isAdmin && <CreateOrganizationSelectionForm organizationId={organization.id} />}
       </div>
-      <div className="space-y-4">
+      <div className="space-y-4 text-sm md:text-md">
         Curated song selections for {organization.name}&apos;s members to use in performances, practices, and events.
         <OrganizationSelectionsFeed organization={organization} />
       </div>

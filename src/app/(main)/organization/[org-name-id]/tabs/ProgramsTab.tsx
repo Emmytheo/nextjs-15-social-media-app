@@ -10,11 +10,12 @@ import kyInstance from "@/lib/ky";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate } from "date-fns";
+import Link from "next/link";
 import { Calendar, Users, MapPin, Clock, Trophy, Award, Target, Folder, Loader2, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
-import { CreateOrganizationProgramForm } from "../CreateOrganizationProgramForm";
+import { OrganizationProgramForm } from "../OrganizationProgramForm";
 import { ViewProgramModal } from "../ViewProgramModal";
 import { ProgramStatus } from "@prisma/client";
-import { OrganizationProgramData } from "@/lib/types";
+import { OrganizationProgramData, OrganizationProgramsPage } from "@/lib/types";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -61,7 +62,7 @@ export function ProgramsTab({ organization, isAdmin }: ProgramsTabProps) {
             <Folder className="w-5 h-5" />
             Programs
           </h3>
-          {isAdmin && <CreateOrganizationProgramForm organizationId={organization.id} />}
+          {isAdmin && <OrganizationProgramForm organizationId={organization.id} />}
         </div>
         <div className="flex justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin" />
@@ -77,7 +78,7 @@ export function ProgramsTab({ organization, isAdmin }: ProgramsTabProps) {
           <Folder className="w-5 h-5" />
           Programs
         </h3>
-        {isAdmin && <CreateOrganizationProgramForm organizationId={organization.id} />}
+        {isAdmin && <OrganizationProgramForm organizationId={organization.id} />}
       </div>
 
       <div className="space-y-6">
@@ -193,8 +194,10 @@ export function ProgramsTab({ organization, isAdmin }: ProgramsTabProps) {
                       </p>
                     )}
                     <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <Button variant="ghost" size="sm">
-                        View Details
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/organization/${organization.id}/programs/${program.id}`}>
+                          View Details
+                        </Link>
                       </Button>
                       {isAdmin && (
                         <Button variant="ghost" size="sm">
@@ -214,7 +217,7 @@ export function ProgramsTab({ organization, isAdmin }: ProgramsTabProps) {
               <p className="text-muted-foreground mb-4">
                 Programs will showcase initiatives, projects, and long-term commitments organized by {organization.name}.
               </p>
-              {isAdmin && <CreateOrganizationProgramForm organizationId={organization.id} />}
+              {isAdmin && <OrganizationProgramForm organizationId={organization.id} />}
             </Card>
           )}
         </div>
@@ -227,7 +230,7 @@ export function ProgramsTab({ organization, isAdmin }: ProgramsTabProps) {
             <p className="text-muted-foreground mb-4">
               Create structured initiatives and manage long-term projects through {organization.name}.
             </p>
-            <CreateOrganizationProgramForm organizationId={organization.id} />
+            <OrganizationProgramForm organizationId={organization.id} />
           </Card>
         )}
       </div>

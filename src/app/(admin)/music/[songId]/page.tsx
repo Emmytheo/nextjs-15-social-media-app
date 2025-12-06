@@ -37,7 +37,7 @@ export default async function SongPage({ params }: SongPageProps) {
   }
 
   return (
-    <div className="container py-6 space-y-8">
+    <div className="container px-6 py-6 space-y-8">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/music">

@@ -21,7 +21,7 @@ export default async function SelectionPage({ params }: SelectionPageProps) {
   }
 
   return (
-    <div className="container py-6 space-y-8">
+    <div className="container px-4 md:px-6 py-6 space-y-8">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/music">

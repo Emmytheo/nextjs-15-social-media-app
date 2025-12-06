@@ -143,14 +143,14 @@ export function MembersTab({ organization, loggedInUser, isAdmin }: MembersTabPr
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{member.user.displayName}</p>
+                          <p className="text-xs md:text-sm font-medium">{member.user.displayName}</p>
                           {isMemberAdmin && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                            <span className="text-xs md:text-sm bg-primary/10 text-primary px-2 py-1 rounded">
                               Admin
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs md:text-sm text-muted-foreground">
                           @{member.user.username}
                         </p>
                       </div>
@@ -158,7 +158,7 @@ export function MembersTab({ organization, loggedInUser, isAdmin }: MembersTabPr
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs md:text-sm text-muted-foreground">
                       Joined {formatDate(member.joinedAt, "MMM d, yyyy")}
                     </span>
 

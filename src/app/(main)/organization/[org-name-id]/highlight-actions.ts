@@ -73,3 +73,67 @@ export async function createOrganizationHighlight(organizationId: string, input:
 
   return highlight;
 }
+
+export async function updateOrganizationHighlight(
+  highlightId: string,
+  input: {
+    title: string;
+    content: string;
+    excerpt?: string;
+    type?: "ARTICLE" | "STORY" | "MEMBER_MENTION" | "ANNOUNCEMENT" | "NEWS";
+    category?: string;
+    featured?: boolean;
+    attachments?: { type: string; url: string }[];
+    activityId?: string;
+    programId?: string;
+  }
+) {
+  const { user } = await validateRequest();
+
+  if (!user) throw new Error("Unauthorized");
+
+  const highlight = await prisma.organizationHighlight.findUnique({
+    where: { id: highlightId },
+    include: {
+      organization: {
+        include: {
+          admins: {
+            where: { userId: user.id },
+          },
+        },
+      },
+    },
+  });
+
+  if (!highlight) throw new Error("Highlight not found");
+
+  const isAdmin = highlight.organization.admins.length > 0;
+
+  if (!isAdmin) throw new Error("Access denied");
+
+  const { title, content, excerpt, type, category, featured, attachments, activityId, programId } = input;
+
+  const updatedHighlight = await prisma.organizationHighlight.update({
+    where: { id: highlightId },
+    data: {
+      title,
+      content,
+      excerpt,
+      type,
+      category,
+      featured,
+      activityId,
+      programId,
+    //   attachments: {
+    //     deleteMany: {},
+    //     create: attachments?.map((attachment) => ({
+    //       type: attachment.type as "IMAGE" | "VIDEO",
+    //       url: attachment.url,
+    //     })) || [],
+    //   },
+    },
+    include: getOrganizationHighlightInclude(user.id),
+  });
+
+  return updatedHighlight;
+}
