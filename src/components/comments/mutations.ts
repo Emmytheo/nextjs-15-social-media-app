@@ -8,7 +8,10 @@ import {
 import { useToast } from "../ui/use-toast";
 import { deleteComment, submitComment } from "./actions";
 
-export function useSubmitCommentMutation(postId: string) {
+export function useSubmitCommentMutation(
+  postId: string,
+  postType: "post" | "organization" = "post",
+) {
   const { toast } = useToast();
 
   const queryClient = useQueryClient();
@@ -16,7 +19,7 @@ export function useSubmitCommentMutation(postId: string) {
   const mutation = useMutation({
     mutationFn: submitComment,
     onSuccess: async (newComment) => {
-      const queryKey: QueryKey = ["comments", postId];
+      const queryKey: QueryKey = ["comments", postId, postType];
 
       await queryClient.cancelQueries({ queryKey });
 

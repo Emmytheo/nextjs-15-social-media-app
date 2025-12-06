@@ -8,16 +8,19 @@ import CommentInput from "./CommentInput";
 
 interface CommentsProps {
   post: PostData;
+  type?: "post" | "organization";
 }
 
-export default function Comments({ post }: CommentsProps) {
+export default function Comments({ post, type = "post" }: CommentsProps) {
   const { data, fetchNextPage, hasNextPage, isFetching, status } =
     useInfiniteQuery({
-      queryKey: ["comments", post.id],
+      queryKey: ["comments", post.id, type],
       queryFn: ({ pageParam }) =>
         kyInstance
           .get(
-            `/api/posts/${post.id}/comments`,
+            type === "organization"
+              ? `/api/organization-posts/${post.id}/comments`
+              : `/api/posts/${post.id}/comments`,
             pageParam ? { searchParams: { cursor: pageParam } } : {},
           )
           .json<CommentsPage>(),
@@ -33,7 +36,7 @@ export default function Comments({ post }: CommentsProps) {
 
   return (
     <div className="space-y-3">
-      <CommentInput post={post} />
+      <CommentInput post={post} type={type} />
       {hasNextPage && (
         <Button
           variant="link"

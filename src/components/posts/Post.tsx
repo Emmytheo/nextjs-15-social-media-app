@@ -20,9 +20,10 @@ import "@splidejs/react-splide/css";
 
 interface PostProps {
   post: PostData;
+  type?: "post" | "organization";
 }
 
-export default function Post({ post }: PostProps) {
+export default function Post({ post, type = "post" }: PostProps) {
   const { user } = useSession();
 
   const [showComments, setShowComments] = useState(false);
@@ -45,13 +46,19 @@ export default function Post({ post }: PostProps) {
                 {post.user.displayName}
               </Link>
             </UserTooltip>
-            <Link
-              href={`/posts/${post.id}`}
-              className="block text-sm text-muted-foreground hover:underline"
-              suppressHydrationWarning
-            >
-              {formatRelativeDate(post.createdAt)}
-            </Link>
+            {type === "post" ? (
+              <Link
+                href={`/posts/${post.id}`}
+                className="block text-sm text-muted-foreground hover:underline"
+                suppressHydrationWarning
+              >
+                {formatRelativeDate(post.createdAt)}
+              </Link>
+            ) : (
+              <span className="block text-sm text-muted-foreground">
+                {formatRelativeDate(post.createdAt)}
+              </span>
+            )}
           </div>
         </div>
         {post.user.id === user?.id && (
@@ -82,16 +89,18 @@ export default function Post({ post }: PostProps) {
             onClick={() => setShowComments(!showComments)}
           />
         </div>
-        <BookmarkButton
-          postId={post.id}
-          initialState={{
-            isBookmarkedByUser: post.bookmarks && post.bookmarks.some(
-              (bookmark) => bookmark.userId === user?.id,
-            ),
-          }}
-        />
+        {type === "post" && (
+          <BookmarkButton
+            postId={post.id}
+            initialState={{
+              isBookmarkedByUser:
+                post.bookmarks &&
+                post.bookmarks.some((bookmark) => bookmark.userId === user?.id),
+            }}
+          />
+        )}
       </div>
-      {showComments && <Comments post={post} />}
+      {showComments && <Comments post={post} type={type} />}
     </article>
   );
 }

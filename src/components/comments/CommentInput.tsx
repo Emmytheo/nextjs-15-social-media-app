@@ -7,12 +7,13 @@ import { useSubmitCommentMutation } from "./mutations";
 
 interface CommentInputProps {
   post: PostData;
+  type?: "post" | "organization";
 }
 
-export default function CommentInput({ post }: CommentInputProps) {
+export default function CommentInput({ post, type = "post" }: CommentInputProps) {
   const [input, setInput] = useState("");
 
-  const mutation = useSubmitCommentMutation(post.id);
+  const mutation = useSubmitCommentMutation(post.id, type);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,6 +24,7 @@ export default function CommentInput({ post }: CommentInputProps) {
       {
         post,
         content: input,
+        postType: type,
       },
       {
         onSuccess: () => setInput(""),

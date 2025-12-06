@@ -8,15 +8,31 @@ import { createCommentSchema } from "@/lib/validation";
 export async function submitComment({
   post,
   content,
+  postType = "post",
 }: {
   post: PostData;
   content: string;
+  postType?: "post" | "organization";
 }) {
   const { user } = await validateRequest();
 
   if (!user) throw new Error("Unauthorized");
 
   const { content: contentValidated } = createCommentSchema.parse({ content });
+
+  if (postType === "organization") {
+    // For organization posts, we don't create notifications for now
+    // as the notification system is linked to the 'Post' model, not 'OrganizationPost'
+    const newComment = await prisma.comment.create({
+      data: {
+        content: contentValidated,
+        orgPostId: post.id,
+        userId: user.id,
+      },
+      include: getCommentDataInclude(user.id),
+    });
+    return newComment;
+  }
 
   const [newComment] = await prisma.$transaction([
     prisma.comment.create({
