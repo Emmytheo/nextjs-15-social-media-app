@@ -8,6 +8,8 @@ export default function useInitializeChatClient() {
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
 
   useEffect(() => {
+    if (!user) return;
+
     const client = StreamChat.getInstance(process.env.NEXT_PUBLIC_STREAM_KEY!, {
       timeout: 10000, // 10 seconds timeout instead of default 3 seconds
     });
@@ -36,7 +38,7 @@ export default function useInitializeChatClient() {
         .catch((error) => console.error("Failed to disconnect user", error))
         .then(() => console.log("Connection closed"));
     };
-  }, [user.id, user.username, user.displayName, user.avatarUrl]);
+  }, [user?.id, user?.username, user?.displayName, user?.avatarUrl]);
 
   return chatClient;
 }
