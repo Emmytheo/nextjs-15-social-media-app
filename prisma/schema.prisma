@@ -42,6 +42,7 @@ model User {
   organizationGallery     OrganizationGallery[]
   highlightLikes          OrganizationHighlightLike[]
   activityParticipants    OrganizationActivityParticipant[]
+  issuedOrganizationInvitations OrganizationInvitation[]
 
   createdAt     DateTime        @default(now())
   EventActivity EventActivity[]
