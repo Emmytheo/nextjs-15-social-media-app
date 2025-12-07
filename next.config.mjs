@@ -23,6 +23,12 @@ const nextConfig = {
         hostname: "utfs.io",
         pathname: `/f/*`,
       },
+      {
+        protocol: "https",
+        hostname: "nextjs-15-social-media-app-kappa.vercel.app",
+        pathname: `/*`,
+      },
+
     ],
   },
   rewrites: () => {
