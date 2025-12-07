@@ -45,6 +45,7 @@ export const ourFileRouter = {
       if (!user) throw new UploadThingError("Unauthorized");
       return { userId: user.id };
     })
+    .onUploadComplete(async ({ file, metadata }) => {
       const formattedUrl = file.url;
 
       const media = await prisma.media.create({
