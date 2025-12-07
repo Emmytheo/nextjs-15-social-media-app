@@ -85,6 +85,7 @@ export function getNotificationDataSelect(loggedInUserId: string) {
     read: true,
     issuerId: true,
     postId: true,
+    organizationId: true,
     issuer: {
       select: getUserDataSelect(loggedInUserId),
     },

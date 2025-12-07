@@ -62,7 +62,7 @@ export async function inviteMemberToOrganization(organizationId: string, email: 
         recipientId: existingUser.id,
         issuerId: user.id,
         type: "ORGANIZATION_INVITE",
-        postId: organizationId, // Using postId to store organizationId
+        organizationId,
       },
     });
 
@@ -73,10 +73,10 @@ export async function inviteMemberToOrganization(organizationId: string, email: 
     // Create invitation notification
     await prisma.notification.create({
       data: {
-        recipientId: existingUser.id,
-        issuerId: user.id,
+        recipient: { connect: { id: existingUser.id } },
+        issuer: { connect: { id: user.id } },
         type: "ORGANIZATION_INVITE",
-        postId: organizationId,
+        organization: { connect: { id: organizationId } },
         read: false,
       },
     });
@@ -162,7 +162,8 @@ export async function acceptOrganizationInvitation(notificationId: string): Prom
     throw new Error("Unauthorized to accept this invitation");
   }
 
-  const organizationId = notification.postId;
+  // Ensure organizationId is available on the type
+  const organizationId = notification.organizationId;
 
   if (!organizationId) {
     throw new Error("Invalid invitation: No organization ID");
@@ -196,11 +197,46 @@ export async function acceptOrganizationInvitation(notificationId: string): Prom
     },
   });
 
+
   // Mark notification as read
   await prisma.notification.update({
     where: { id: notificationId },
     data: { read: true },
   });
 
+  // Update OrganizationInvitation status if it exists
+  await prisma.organizationInvitation.updateMany({
+      where: {
+          organizationId,
+          email: user.email!,
+          status: "PENDING"
+      },
+      data: {
+          status: "ACCEPTED",
+          acceptedAt: new Date()
+      }
+  });
+
   return { success: true, message: "Successfully joined the organization" };
 }
+
+export async function getPendingInvitation(organizationId: string) {
+  const { user } = await validateRequest();
+
+  if (!user) return null;
+
+  const notification = await prisma.notification.findFirst({
+    where: {
+      recipientId: user.id,
+      organizationId,
+      type: "ORGANIZATION_INVITE",
+      read: false,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return notification;
+}
+

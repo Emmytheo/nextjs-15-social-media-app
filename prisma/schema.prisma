@@ -169,6 +169,8 @@ model Notification {
   issuer      User             @relation("Issuer", fields: [issuerId], references: [id], onDelete: Cascade)
   postId      String?
   post        Post?            @relation(fields: [postId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   type        NotificationType
   read        Boolean          @default(false)
 
@@ -191,6 +193,7 @@ model Organization {
   description String?
   logoUrl     String?
   bannerUrl   String?
+  inviteCode  String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -204,8 +207,39 @@ model Organization {
   programs   OrganizationProgram[]
   gallery    OrganizationGallery[]
   events     Event[]
+  notifications Notification[]
+  invitations OrganizationInvitation[]
 
   @@map("organizations")
+}
+
+model OrganizationInvitation {
+  id             String       @id @default(cuid())
+  email          String
+  token          String       @unique
+  role           String       @default("MEMBER") // MEMBER or ADMIN
+  
+  status         InvitationStatus @default(PENDING)
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  issuerId       String
+  issuer         User         @relation(fields: [issuerId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime     @default(now())
+  expiresAt      DateTime?
+  acceptedAt     DateTime?
+  rejectedAt     DateTime?
+
+  @@map("organization_invitations")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
 }
 
 model OrganizationMember {

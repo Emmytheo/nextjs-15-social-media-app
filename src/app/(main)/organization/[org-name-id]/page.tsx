@@ -1,4 +1,5 @@
 import { validateRequest } from "@/auth";
+import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import prisma from "@/lib/prisma";
@@ -24,6 +25,8 @@ import { Building2, Calendar, Users, FileText, Edit } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { OrganizationFab } from "./OrganizationFab";
+import InvitationBanner from "./InvitationBanner";
+import { getPendingInvitation } from "./member-actions";
 
 interface PageProps {
   params: { "org-name-id": string };
@@ -130,6 +133,7 @@ export async function generateMetadata({
 
 export default async function Page({
   params: { "org-name-id": orgNameOrId },
+  searchParams,
 }: PageProps) {
   const { user: loggedInUser } = await validateRequest();
 
@@ -139,55 +143,80 @@ export default async function Page({
 
   const isAdmin = loggedInUser ? organization.admins.some(a => a.userId === loggedInUser.id) : false;
 
-  return (
-    <main className="flex w-full min-w-0 gap-5">
-      <div className="w-full min-w-0 space-y-5">
-        <OrganizationProfile
-          organization={organization}
-          loggedInUserId={loggedInUser?.id}
-        />
-        <Tabs defaultValue="posts">
-          <TabsList
-            className="w-full !justify-start overflow-x-auto sticky top-[70px] shadow-md z-10"
-            style={{ scrollbarWidth: "none" }}
-          >
-            <TabsTrigger value="posts">Posts</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="selections">Selections</TabsTrigger>
-            <TabsTrigger value="highlights">Highlights</TabsTrigger>
-            <TabsTrigger value="activities">Activities</TabsTrigger>
-            <TabsTrigger value="programs">Programs</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="gallery">Gallery</TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="posts">
-            <OrganizationFeed organization={organization} isAdmin={isAdmin} />
-          </TabsContent>
-          <TabsContent value="members">
-            <MembersTab organization={organization} loggedInUser={loggedInUser} isAdmin={isAdmin} />
-          </TabsContent>
-          <TabsContent value="selections">
-            <SelectionsTab organization={organization} isAdmin={isAdmin} />
-          </TabsContent>
-          <TabsContent value="highlights">
-            <HighlightsTab organization={organization} isAdmin={isAdmin} />
-          </TabsContent>
-          <TabsContent value="programs">
-            <ProgramsTab organization={organization} isAdmin={isAdmin} />
-          </TabsContent>
-          <TabsContent value="activities">
-            <ActivitiesTab organization={organization} isAdmin={isAdmin} />
-          </TabsContent>
-          <TabsContent value="events">
-            <OrganizationEventsTab organization={organization} isAdmin={isAdmin} />
-          </TabsContent>
-          <TabsContent value="gallery">
-            <GalleryTab organization={organization} isAdmin={isAdmin} />
-          </TabsContent>
-        </Tabs>
+  const pendingInvitation = loggedInUser ? await getPendingInvitation(organization.id) : null;
+
+  const currentTab = searchParams.tab || "posts";
+
+  return (
+    <main className="flex w-full min-w-0 gap-5 flex-col">
+      {pendingInvitation && <InvitationBanner notificationId={pendingInvitation.id} />}
+      <div className="flex w-full min-w-0 gap-5">
+        <div className="w-full min-w-0 space-y-5">
+          <OrganizationProfile
+            organization={organization}
+            loggedInUserId={loggedInUser?.id}
+          />
+
+          <Tabs defaultValue={currentTab}>
+            <TabsList
+              className="w-full !justify-start overflow-x-auto sticky top-[70px] shadow-md z-10"
+              style={{ scrollbarWidth: "none" }}
+            >
+              <TabsTrigger value="posts" asChild>
+                <Link href={`?tab=posts`} replace scroll={false}>Posts</Link>
+              </TabsTrigger>
+              <TabsTrigger value="members" asChild>
+                <Link href={`?tab=members`} replace scroll={false}>Members</Link>
+              </TabsTrigger>
+              <TabsTrigger value="selections" asChild>
+                <Link href={`?tab=selections`} replace scroll={false}>Selections</Link>
+              </TabsTrigger>
+              <TabsTrigger value="highlights" asChild>
+                <Link href={`?tab=highlights`} replace scroll={false}>Highlights</Link>
+              </TabsTrigger>
+              <TabsTrigger value="activities" asChild>
+                <Link href={`?tab=activities`} replace scroll={false}>Activities</Link>
+              </TabsTrigger>
+              <TabsTrigger value="programs" asChild>
+                <Link href={`?tab=programs`} replace scroll={false}>Programs</Link>
+              </TabsTrigger>
+              <TabsTrigger value="events" asChild>
+                <Link href={`?tab=events`} replace scroll={false}>Events</Link>
+              </TabsTrigger>
+              <TabsTrigger value="gallery" asChild>
+                <Link href={`?tab=gallery`} replace scroll={false}>Gallery</Link>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="posts">
+              <OrganizationFeed organization={organization} isAdmin={isAdmin} />
+            </TabsContent>
+            <TabsContent value="members">
+              <MembersTab organization={organization} loggedInUser={loggedInUser} isAdmin={isAdmin} />
+            </TabsContent>
+            <TabsContent value="selections">
+              <SelectionsTab organization={organization} isAdmin={isAdmin} />
+            </TabsContent>
+            <TabsContent value="highlights">
+              <HighlightsTab organization={organization} isAdmin={isAdmin} />
+            </TabsContent>
+            <TabsContent value="programs">
+              <ProgramsTab organization={organization} isAdmin={isAdmin} />
+            </TabsContent>
+            <TabsContent value="activities">
+              <ActivitiesTab organization={organization} isAdmin={isAdmin} />
+            </TabsContent>
+            <TabsContent value="events">
+              <OrganizationEventsTab organization={organization} isAdmin={isAdmin} />
+            </TabsContent>
+            <TabsContent value="gallery">
+              <GalleryTab organization={organization} isAdmin={isAdmin} />
+            </TabsContent>
+          </Tabs>
+        </div>
+        <OrganizationSidebar organization={organization} />
       </div>
-      <OrganizationSidebar organization={organization} />
     </main>
   );
 }

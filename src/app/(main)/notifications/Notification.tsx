@@ -32,12 +32,12 @@ export default function Notification({ notification }: NotificationProps) {
     ORGANIZATION_INVITE: {
       message: `${notification.issuer.displayName} invited you to an organization`,
       icon: <User2 className="size-7 text-primary" />,
-      href: `/organization/${notification.postId}`,
+      href: `/organization/${notification.organizationId}`,
     },
     ORGANIZATION_UPDATE: {
       message: `Organization update`,
       icon: <User2 className="size-7 text-primary" />,
-      href: `/organization/${notification.postId}`,
+      href: `/organization/${notification.organizationId}`,
     },
   };
 

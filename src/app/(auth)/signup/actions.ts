@@ -16,15 +16,28 @@ export async function signUp(
   try {
     const { username, email, password, invitationCode } = signUpSchema.parse(credentials);
 
+
     // Validate invitation code
     const validCodes = process.env.INVITATION_CODES?.split(',').map(code => code.trim()) || [];
     
-    if (validCodes.length === 0) {
-      return { error: "Signup is currently disabled. Please contact an administrator." };
-    }
-    
+    let organizationIdToJoin: string | null = null;
+    let organizationRole: string = "MEMBER";
+
+    // Check if it's a global invite code
     if (!validCodes.includes(invitationCode)) {
-      return { error: "Invalid invitation code. Please contact an administrator for access." };
+      // Check if it's an organization invite code
+      const organization = await prisma.organization.findUnique({
+        where: { inviteCode: invitationCode },
+        select: { id: true }
+      });
+
+      if (organization) {
+        organizationIdToJoin = organization.id;
+      } else {
+         // Also check for pending OrganizationInvitation tokens if we want to support direct link-like codes
+         // For now, based on requirements, just checking Org inviteCode
+         return { error: "Invalid invitation code. Please contact an administrator for access." };
+      }
     }
 
     const passwordHash = await hash(password, {
@@ -76,11 +89,22 @@ export async function signUp(
           passwordHash,
         },
       });
+      
       await streamServerClient.upsertUser({
         id: userId,
         username,
         name: username,
       });
+
+      // If signed up with organization code, add to organization
+      if (organizationIdToJoin) {
+        await tx.organizationMember.create({
+          data: {
+             userId,
+             organizationId: organizationIdToJoin,
+          }
+        });
+      }
     });
 
     const session = await lucia.createSession(userId, {});
