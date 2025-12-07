@@ -28,6 +28,11 @@ const nextConfig = {
         hostname: "nextjs-15-social-media-app-kappa.vercel.app",
         pathname: `/*`,
       },
+      {
+        protocol: "https",
+        hostname: "7yt8ct4ijw.ufs.sh",
+        pathname: `/*`,
+      },
 
     ],
   },
