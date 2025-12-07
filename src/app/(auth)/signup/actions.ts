@@ -27,7 +27,7 @@ export async function signUp(
     if (!validCodes.includes(invitationCode)) {
       // Check if it's an organization invite code
       const organization = await prisma.organization.findFirst({
-        // @ts-expect-error inviteCode exists in schema but types are stale
+        // inviteCode exists in schema and types are now correct
         where: { inviteCode: invitationCode },
         select: { id: true }
       });
