@@ -25,7 +25,7 @@ export default function UserTooltip({ children, user }: UserTooltipProps) {
   const followerState: FollowerInfo = {
     followers: user._count.followers,
     isFollowedByUser: !!user.followers.some(
-      ({ followerId }) => followerId === loggedInUser.id,
+      ({ followerId }) => followerId === loggedInUser?.id,
     ),
   };
 
@@ -39,7 +39,7 @@ export default function UserTooltip({ children, user }: UserTooltipProps) {
               <Link href={`/users/${user.username}`}>
                 <UserAvatar size={70} avatarUrl={user.avatarUrl} />
               </Link>
-              {loggedInUser.id !== user.id && (
+              {loggedInUser?.id !== user.id && (
                 <FollowButton userId={user.id} initialState={followerState} />
               )}
             </div>

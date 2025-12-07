@@ -45,6 +45,7 @@ export default function EditOrganizationForm({
       name: organization.name,
       description: organization.description || "",
       logo: organization.logoUrl || "",
+      banner: organization.bannerUrl || "",
     },
   });
 

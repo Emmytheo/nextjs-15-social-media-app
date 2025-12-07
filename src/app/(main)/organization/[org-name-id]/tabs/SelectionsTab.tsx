@@ -3,6 +3,7 @@
 import { OrganizationWithCounts } from "../page";
 import { OrganizationSelectionsFeed } from "../OrganizationSelectionsFeed";
 import { CreateOrganizationSelectionForm } from "../CreateOrganizationSelectionForm";
+import { RestrictedContent } from "../RestrictedContent";
 import { Music } from "lucide-react";
 
 interface SelectionsTabProps {
@@ -11,6 +12,12 @@ interface SelectionsTabProps {
 }
 
 export function SelectionsTab({ organization, isAdmin }: SelectionsTabProps) {
+  const isMember = organization.members.length > 0;
+
+  if (!isMember && !isAdmin) {
+    return <RestrictedContent />;
+  }
+
   return (
     <div className="rounded-2xl bg-card p-5">
       <div className="mb-6 flex items-center justify-between">

@@ -235,3 +235,65 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await validateRequest();
+    if (!session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, name, description, logo, banner } = body;
+
+    if (!id) {
+        return NextResponse.json(
+            { error: "Organization ID is required" },
+            { status: 400 },
+        );
+    }
+
+    const organization = await prisma.organization.findUnique({
+        where: { id },
+        include: {
+            admins: true,
+        },
+    });
+
+    if (!organization) {
+        return NextResponse.json(
+            { error: "Organization not found" },
+            { status: 404 },
+        );
+    }
+
+    const isAdmin = organization.admins.some(
+        (admin) => admin.userId === session.user.id
+    );
+
+    if (!isAdmin) {
+        return NextResponse.json(
+            { error: "You do not have permission to edit this organization" },
+            { status: 403 },
+        );
+    }
+
+    const updatedOrganization = await prisma.organization.update({
+        where: { id },
+        data: {
+            name,
+            description,
+            logoUrl: logo,
+            bannerUrl: banner,
+        },
+    });
+
+    return NextResponse.json(updatedOrganization);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to update organization" },
+      { status: 500 },
+    );
+  }
+}

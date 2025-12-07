@@ -23,7 +23,7 @@ import { EventWithDetails } from "../../events/[event-id]/page";
 import { Building2, Calendar, Users, FileText, Edit } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { EditOrganizationFAB } from "./EditOrganizationFAB";
+import { OrganizationFab } from "./OrganizationFab";
 
 interface PageProps {
   params: { "org-name-id": string };
@@ -36,6 +36,7 @@ export interface OrganizationWithCounts {
   nameId: string;
   description: string | null;
   logoUrl: string | null;
+  bannerUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
   events?: EventWithDetails[];
@@ -287,7 +288,7 @@ function OrganizationProfile({
       </div>
 
       {isAdmin && (
-        <EditOrganizationFAB organization={organization} />
+        <OrganizationFab organization={organization} isAdmin={isAdmin} />
       )}
     </div>
   );

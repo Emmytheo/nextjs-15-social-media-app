@@ -72,7 +72,7 @@ export async function POST(
       return Response.json({ error: "Access denied" }, { status: 403 });
     }
 
-    const { content, attachments } = await request.json();
+    const { content, mediaIds } = await request.json();
 
     if (!content) {
       return Response.json({ error: "Content is required" }, { status: 400 });
@@ -84,10 +84,7 @@ export async function POST(
         organizationId,
         userId: user.id,
         attachments: {
-          create: attachments?.map((attachment: any) => ({
-            type: attachment.type,
-            url: attachment.url,
-          })) || [],
+          connect: mediaIds?.map((id: string) => ({ id })) || [],
         },
       },
       include: getOrganizationPostInclude(user.id),

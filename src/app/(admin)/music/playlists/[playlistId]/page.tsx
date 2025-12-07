@@ -86,7 +86,7 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
                         currentUserId={user?.id}
                         className="flex flex-col items-start justify-center p-2"
                         aspectRatio="square"
-                        width={180}
+                        // width={180}
                         height={180}
                       />
                     ))}

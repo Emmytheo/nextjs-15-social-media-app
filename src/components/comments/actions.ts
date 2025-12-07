@@ -6,11 +6,11 @@ import { getCommentDataInclude, PostData } from "@/lib/types";
 import { createCommentSchema } from "@/lib/validation";
 
 export async function submitComment({
-  post,
+  postId,
   content,
   postType = "post",
 }: {
-  post: PostData;
+  postId: string;
   content: string;
   postType?: "post" | "organization";
 }) {
@@ -23,33 +23,50 @@ export async function submitComment({
   if (postType === "organization") {
     // For organization posts, we don't create notifications for now
     // as the notification system is linked to the 'Post' model, not 'OrganizationPost'
+    
+    // Check if post exists
+    const post = await prisma.organizationPost.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post) throw new Error("Post not found");
+
     const newComment = await prisma.comment.create({
       data: {
         content: contentValidated,
-        orgPostId: post.id,
+        orgPostId: postId,
         userId: user.id,
       },
       include: getCommentDataInclude(user.id),
     });
-    return newComment;
+    return JSON.parse(JSON.stringify(newComment));
   }
+
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    select: {
+      userId: true,
+    },
+  });
+
+  if (!post) throw new Error("Post not found");
 
   const [newComment] = await prisma.$transaction([
     prisma.comment.create({
       data: {
         content: contentValidated,
-        postId: post.id,
+        postId: postId,
         userId: user.id,
       },
       include: getCommentDataInclude(user.id),
     }),
-    ...(post.user.id !== user.id
+    ...(post.userId !== user.id
       ? [
           prisma.notification.create({
             data: {
               issuerId: user.id,
-              recipientId: post.user.id,
-              postId: post.id,
+              recipientId: post.userId,
+              postId: postId,
               type: "COMMENT",
             },
           }),
@@ -57,7 +74,7 @@ export async function submitComment({
       : []),
   ]);
 
-  return newComment;
+  return JSON.parse(JSON.stringify(newComment));
 }
 
 export async function deleteComment(id: string) {

@@ -52,17 +52,17 @@ export function GalleryTab({ organization, isAdmin }: GalleryTabProps) {
         </TabsList>
 
         <TabsContent value="photos" className="mt-6">
-          <div className="space-y-6">
+          <div className="space-y-6 text-sm md:text-md">
             Capture and share memorable moments from {organization.name}&apos;s events and activities.
 
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-[400px] overflow-hidden">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="aspect-video bg-muted animate-pulse rounded-md" />
                 ))}
               </div>
             ) : galleryItems.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-[400px] overflow-hidden mt-6">
                 {galleryItems.map((item) => (
                   <Card key={item.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
                     <div className="aspect-video relative bg-muted">

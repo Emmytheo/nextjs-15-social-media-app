@@ -17,8 +17,23 @@ export function useSubmitCommentMutation(
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: submitComment,
+    mutationFn: (input) => {
+      // Explicitly construct plain object to ensure serialization safety
+      const payload = {
+        postId: input.postId,
+        content: input.content,
+        postType: input.postType,
+      };
+      return submitComment(JSON.parse(JSON.stringify(payload)));
+    },
     onSuccess: async (newComment) => {
+      // Manually revive dates because we returned a JSON-ified object from the server action
+      // to avoid serialization errors
+      const newCommentWithDates = {
+        ...newComment,
+        createdAt: new Date(newComment.createdAt),
+      };
+
       const queryKey: QueryKey = ["comments", postId, postType];
 
       await queryClient.cancelQueries({ queryKey });
@@ -34,7 +49,7 @@ export function useSubmitCommentMutation(
               pages: [
                 {
                   previousCursor: firstPage.previousCursor,
-                  comments: [...firstPage.comments, newComment],
+                  comments: [...firstPage.comments, newCommentWithDates],
                 },
                 ...oldData.pages.slice(1),
               ],

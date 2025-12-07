@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { validateRequest } from "@/auth";
 import { User } from "lucia";
+import { RestrictedContent } from "../RestrictedContent";
 
 interface MembersTabProps {
   organization: OrganizationWithCounts;
@@ -104,6 +105,12 @@ export function MembersTab({ organization, loggedInUser, isAdmin }: MembersTabPr
         </div>
       </div>
     );
+  }
+
+  const isMember = organization.members.length > 0;
+
+  if (!isMember && !isAdmin) {
+    return <RestrictedContent />;
   }
 
   return (

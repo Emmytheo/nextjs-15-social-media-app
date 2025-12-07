@@ -98,6 +98,7 @@ export function getOrganizationDataSelect() {
     name: true,
     description: true,
     logoUrl: true,
+    bannerUrl: true,
     createdAt: true,
     _count: {
       select: {

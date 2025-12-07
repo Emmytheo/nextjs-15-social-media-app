@@ -4,15 +4,16 @@ import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import { getOrganizationPostInclude } from "@/lib/types";
 
-export async function useSubmitOrganizationPost(organizationId: string, input: {
+export async function submitOrganizationPost(input: {
   content: string;
-  attachments?: { type: string; url: string }[];
+  mediaIds: string[];
+  organizationId: string;
 }) {
   const { user } = await validateRequest();
 
   if (!user) throw new Error("Unauthorized");
 
-  const { content, attachments } = input;
+  const { content, mediaIds, organizationId } = input;
 
   if (!content) {
     throw new Error("Content is required");
@@ -48,10 +49,7 @@ export async function useSubmitOrganizationPost(organizationId: string, input: {
       organizationId,
       userId: user.id,
       attachments: {
-        create: attachments?.map((attachment) => ({
-          type: attachment.type as "IMAGE" | "VIDEO",
-          url: attachment.url,
-        })) || [],
+        connect: mediaIds.map((id) => ({ id })),
       },
     },
     include: getOrganizationPostInclude(user.id),

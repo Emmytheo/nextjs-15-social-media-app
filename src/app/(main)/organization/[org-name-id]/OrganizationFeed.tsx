@@ -124,30 +124,6 @@ export function OrganizationFeed({ organization, isAdmin }: OrganizationFeedProp
     >
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold"></h3>
-
-        {isAdmin && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                size="sm"
-                className="fixed bottom-24 right-4 z-30 h-12 w-12 rounded-full p-4 shadow-md"
-              >
-                <Plus className="h-8 w-8" />
-                {/* Add Post */}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-transparent border-0">
-              {/* <DialogHeader> */}
-              {/* <DialogTitle>Add New Post</DialogTitle>
-                <DialogDescription>
-                  Post on your organization's page.
-                </DialogDescription> */}
-
-              {/* </DialogHeader> */}
-              <OrganizationPostEditor organizationId={organization.id} />
-            </DialogContent>
-          </Dialog>
-        )}
       </div>
 
       {posts.map((post) => (
