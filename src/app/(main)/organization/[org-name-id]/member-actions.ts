@@ -205,7 +205,7 @@ export async function acceptOrganizationInvitation(notificationId: string): Prom
   });
 
   // Update OrganizationInvitation status if it exists
-  // @ts-expect-error organizationInvitation exists in schema but types are stale
+  // organizationInvitation exists in schema and types should be correct now
   await prisma.organizationInvitation.updateMany({
       where: {
           organizationId,
