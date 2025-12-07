@@ -6,7 +6,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useSubmitOrganizationPost } from "./post-actions";
+import { submitOrganizationPost } from "./post-actions";
 
 
 export function useSubmitOrganizationPostMutation(organizationId: string) {
@@ -15,7 +15,8 @@ export function useSubmitOrganizationPostMutation(organizationId: string) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: useSubmitOrganizationPost.bind(null, organizationId),
+    mutationFn: ({ content, mediaIds }: { content: string; mediaIds: string[] }) => 
+      submitOrganizationPost({ content, mediaIds, organizationId }),
     onSuccess: async (newPost: OrganizationPostData) => {
       const queryFilter = {
         queryKey: ["organization-feed", "organization-posts", organizationId],

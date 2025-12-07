@@ -68,17 +68,17 @@ export function NavUser(
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage
-                  src={user.avatarUrl ?? undefined}
-                  alt={user.displayName}
+                  src={user?.avatarUrl ?? undefined}
+                  alt={user?.displayName ?? "User"}
                 />
                 <AvatarFallback className="rounded-lg">
-                  {user.displayName?.charAt(0).toUpperCase() ?? "U"}
+                  {user?.displayName?.charAt(0).toUpperCase() ?? "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.displayName}</span>
+                <span className="truncate font-medium">{user?.displayName ?? "User"}</span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {user.email}
+                  {user?.email}
                 </span>
               </div>
               <MoreVertical className="ml-auto size-4" />
@@ -94,26 +94,26 @@ export function NavUser(
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={user.avatarUrl ?? undefined}
-                    alt={user.displayName}
+                    src={user?.avatarUrl ?? undefined}
+                    alt={user?.displayName ?? "User"}
                   />
                   <AvatarFallback className="rounded-lg">
-                    {user.displayName?.charAt(0).toUpperCase() ?? "U"}
+                    {user?.displayName?.charAt(0).toUpperCase() ?? "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
-                    {user.displayName}
+                    {user?.displayName ?? "User"}
                   </span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {user.email}
+                    {user?.email}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <Link href={`/users/${user.username}`}>
+              <Link href={`/users/${user?.username}`}>
                 <DropdownMenuItem>
                   <CircleUser className="mr-2 size-4" />
                   Account

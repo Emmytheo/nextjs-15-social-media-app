@@ -16,51 +16,7 @@ import { Search, Plus, MapPin, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 
-interface EventWithOrg {
-  image: any;
-  date: string | number | Date;
-  participants: ReactNode;
-  goal: ReactNode;
-  id: string;
-  title: string;
-  description: string | null;
-  category: string | null;
-  startDate: Date;
-  endDate: Date | null;
-  location: string | null;
-  venue: string | null;
-  address: string | null;
-  coverPhotoUrl: string | null;
-  logoUrl: string | null;
-  ticketType: string | null;
-  ticketPrice: number | null;
-  ticketUrl: string | null;
-  programmeOverview: string | null;
-  status: string;
-  isPublished: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  organizationId: string;
-  organization: {
-    id: string;
-    name: string;
-  };
-  attendees?: any
-}
-
-interface GetEventsParams {
-  organizationId?: string | null;
-}
-
-async function getEvents({ organizationId }: GetEventsParams): Promise<EventWithOrg[]> {
-  return ky
-    .get("/api/events", {
-      ...(organizationId && {
-        searchParams: { organizationId },
-      }),
-    })
-    .json();
-}
+import { getEvents } from "./events-api";
 
 export default function EventsPage() {
   const searchParams = useSearchParams();

@@ -30,6 +30,7 @@ export function useSubmitPostMutation() {
           return (
             query.queryKey.includes("for-you") ||
             (query.queryKey.includes("user-posts") &&
+              !!user && 
               query.queryKey.includes(user.id))
           );
         },

@@ -26,7 +26,8 @@ export async function signUp(
     // Check if it's a global invite code
     if (!validCodes.includes(invitationCode)) {
       // Check if it's an organization invite code
-      const organization = await prisma.organization.findUnique({
+      const organization = await prisma.organization.findFirst({
+        // @ts-expect-error inviteCode exists in schema but types are stale
         where: { inviteCode: invitationCode },
         select: { id: true }
       });

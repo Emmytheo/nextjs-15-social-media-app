@@ -6,6 +6,16 @@ import { UploadThingError } from "uploadthing/server";
 const f = createUploadthing();
 
 export const ourFileRouter = {
+  avatar: f({ image: { maxFileSize: "512KB", maxFileCount: 1 } })
+    .middleware(async () => {
+      const { user } = await validateRequest();
+      if (!user) throw new UploadThingError("Unauthorized");
+      return { userId: user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      const oldAvatarUrl = metadata.userId // Optional: Logic to delete old avatar could go here
+      return { avatarUrl: file.url };
+    }),
   organizationLogo: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .onUploadComplete(() => {}),
   organizationBanner: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })

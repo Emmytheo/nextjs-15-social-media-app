@@ -12,7 +12,7 @@ import { formatDate } from "date-fns";
 import Link from "next/link";
 import { useEffect } from "react";
 import { Skeleton } from "./ui/skeleton";
-import { getEvents } from "@/app/(main)/events/page";
+import { getEvents } from "@/app/(main)/events/events-api";
 import { Card } from "./ui/card";
 import Image from "next/image";
 import { Badge } from "./ui/badge";

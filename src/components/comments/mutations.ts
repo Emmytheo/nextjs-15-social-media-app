@@ -17,7 +17,7 @@ export function useSubmitCommentMutation(
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (input) => {
+    mutationFn: (input: { postId: string; content: string; postType: "post" | "organization" }) => {
       // Explicitly construct plain object to ensure serialization safety
       const payload = {
         postId: input.postId,

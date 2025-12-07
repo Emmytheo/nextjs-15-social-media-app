@@ -30,6 +30,7 @@ import { getPendingInvitation } from "./member-actions";
 
 interface PageProps {
   params: { "org-name-id": string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export interface OrganizationWithCounts {
@@ -146,7 +147,8 @@ export default async function Page({
 
   const pendingInvitation = loggedInUser ? await getPendingInvitation(organization.id) : null;
 
-  const currentTab = searchParams.tab || "posts";
+  const tabParam = searchParams.tab;
+  const currentTab = (Array.isArray(tabParam) ? tabParam[0] : tabParam) || "posts";
 
   return (
     <main className="flex w-full min-w-0 gap-5 flex-col">
