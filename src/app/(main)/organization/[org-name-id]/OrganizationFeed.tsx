@@ -26,7 +26,7 @@ import {
 // } from "@radix-ui/react-dialog";
 // import { Dialog } from "radix-ui";
 
-interface OrganizationFeedProps {
+export interface OrganizationFeedProps {
   organization: {
     id: string;
     name: string;

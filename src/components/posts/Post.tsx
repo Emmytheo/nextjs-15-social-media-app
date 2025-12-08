@@ -17,12 +17,12 @@ import LikeButton from "./LikeButton";
 import PostMoreButton from "./PostMoreButton";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
-import { Organization } from "@prisma/client";
+import { OrganizationFeedProps } from "../../app/(main)/organization/[org-name-id]/OrganizationFeed"; 
 
 interface PostProps {
   post: PostData;
   type?: "post" | "organization";
-  organization?: Organization;
+  organization?: OrganizationFeedProps["organization"];
 }
 
 export default function Post({ post, type = "post", organization }: PostProps) {
