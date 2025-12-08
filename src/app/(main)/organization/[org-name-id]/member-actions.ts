@@ -205,18 +205,18 @@ export async function acceptOrganizationInvitation(notificationId: string): Prom
   });
 
   // Update OrganizationInvitation status if it exists
-  // organizationInvitation exists in schema and types should be correct now
-  await prisma.organizationInvitation.updateMany({
-      where: {
-          organizationId,
-          email: user.email!,
-          status: "PENDING"
-      },
-      data: {
-          status: "ACCEPTED",
-          acceptedAt: new Date()
-      }
-  });
+  // // organizationInvitation exists in schema and types should be correct now
+  // await prisma.organizationInvitation.updateMany({
+  //     where: {
+  //         organizationId,
+  //         email: user.email!,
+  //         status: "PENDING"
+  //     },
+  //     data: {
+  //         status: "ACCEPTED",
+  //         acceptedAt: new Date()
+  //     }
+  // });
 
   return { success: true, message: "Successfully joined the organization" };
 }
@@ -226,12 +226,22 @@ export async function getPendingInvitation(organizationId: string) {
 
   if (!user) return null;
 
+  // Check if already a member
+  const existingMembership = await prisma.organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: user.id,
+        organizationId,
+      },
+    },
+  });
+
   const notification = await prisma.notification.findFirst({
     where: {
       recipientId: user.id,
       organizationId,
       type: "ORGANIZATION_INVITE",
-      read: false,
+      read: existingMembership ? false : true,
     },
     select: {
       id: true,

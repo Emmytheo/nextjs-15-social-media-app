@@ -61,7 +61,7 @@ export default async function Page({ params }: PageProps) {
         },
     });
 
-    if (!activity) redirect(`/organization/${orgNameOrId}/tabs/activities`);
+    if (!activity) redirect(`/organization/${orgNameOrId}?tab=activities`);
 
     const isAdmin = user ? activity.organization.admins.some(a => a.userId === user.id) : false;
 
@@ -69,7 +69,7 @@ export default async function Page({ params }: PageProps) {
         <div className="flex flex-1 flex-col gap-4 md:p-4 pt-0">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/organization/${orgNameOrId}/tabs/activities`}>
+                    <Link href={`/organization/${orgNameOrId}?tab=activities`}>
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>

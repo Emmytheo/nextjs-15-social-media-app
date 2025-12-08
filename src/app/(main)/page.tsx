@@ -39,7 +39,9 @@ export default async function Home() {
           <TabsList className="sticky top-[70px] shadow-md z-10">
             <TabsTrigger value="for-you">For you</TabsTrigger>
             <TabsTrigger value="following">Following</TabsTrigger>
-            <TabsTrigger value="organization">Organizations</TabsTrigger>
+            {organization && (
+              <TabsTrigger value="organization">Organizations</TabsTrigger>
+            )}
           </TabsList>
           <TabsContent value="for-you">
             <ForYouFeed />
@@ -52,11 +54,11 @@ export default async function Home() {
               <OrganizationFeed organization={organization} />
             </TabsContent>
           )}
-          {!organization && (
+          {/* {!organization && (
             <TabsContent value="organization">
               <CreateOrganizationForm />
             </TabsContent>
-          )}
+          )} */}
         </Tabs>
       </div>
       <TrendsSidebar />

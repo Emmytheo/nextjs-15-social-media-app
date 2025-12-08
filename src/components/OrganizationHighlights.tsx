@@ -51,7 +51,7 @@ export default function OrganizationHighlights() {
             >
                 {data.highlights.map((highlight) => (
                     <SplideSlide key={highlight.id}>
-                        <Link href={`/organization/${highlight.organizationId}/tabs/highlights`}>
+                        <Link href={`/organization/${highlight.organizationId}?tab=highlights`}>
                             <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer border-muted">
                                 <CardHeader className="pb-2">
                                     <div className="flex items-start justify-between gap-2">

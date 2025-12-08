@@ -55,13 +55,13 @@ export default async function Page({ params }: PageProps) {
         },
     });
 
-    if (!activity) redirect(`/dashboard/organization/${id}/activities`);
+    if (!activity) redirect(`/dashboard/organization/${id}?tab=activities`);
 
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/dashboard/organization/${id}/activities`}>
+                    <Link href={`/dashboard/organization/${id}?tab=activities`}>
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>
