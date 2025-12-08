@@ -127,7 +127,7 @@ export function OrganizationFeed({ organization, isAdmin }: OrganizationFeedProp
       </div>
 
       {posts.map((post) => (
-        <Post key={post.id} post={post as any} type="organization" />
+        <Post key={post.id} post={post as any} type="organization" organization={organization} />
       ))}
       {isFetchingNextPage && <Loader2 className="mx-auto my-3 animate-spin" />}
     </InfiniteScrollContainer>

@@ -17,13 +17,15 @@ import LikeButton from "./LikeButton";
 import PostMoreButton from "./PostMoreButton";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
+import { Organization } from "@prisma/client";
 
 interface PostProps {
   post: PostData;
   type?: "post" | "organization";
+  organization?: Organization;
 }
 
-export default function Post({ post, type = "post" }: PostProps) {
+export default function Post({ post, type = "post", organization }: PostProps) {
   const { user } = useSession();
 
   const [showComments, setShowComments] = useState(false);
@@ -55,7 +57,10 @@ export default function Post({ post, type = "post" }: PostProps) {
                 {formatRelativeDate(post.createdAt)}
               </Link>
             ) : (
-              <span className="block text-sm text-muted-foreground">
+              <span className="flex w-full items-center gap-2 text-sm text-muted-foreground">
+                {organization &&
+                  <div className="flex m-0 items-center gap-2">{organization?.name}
+                    <span>•</span> </div>}
                 {formatRelativeDate(post.createdAt)}
               </span>
             )}
