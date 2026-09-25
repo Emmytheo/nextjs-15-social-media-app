@@ -1,7 +1,6 @@
 import { validateRequest } from "@/auth";
 import Link from "next/link";
-import Linkify from "@/components/Linkify";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, ScrollableTabsList, TabsTrigger } from "@/components/ui/tabs";
 import prisma from "@/lib/prisma";
 import { formatNumber } from "@/lib/utils";
 import { formatDate } from "date-fns";
@@ -167,35 +166,35 @@ export default async function Page({
           />
 
           <Tabs defaultValue={currentTab}>
-            <TabsList
-              className="w-full !justify-start overflow-x-auto sticky top-[70px] shadow-md z-10 bg-card"
-              style={{ scrollbarWidth: "none" }}
+            <ScrollableTabsList
+              containerClassName="sticky top-[70px] z-10 rounded-2xl shadow-sm"
+              className="w-full !justify-start bg-card/95 backdrop-blur-md border border-border/70 p-1.5 rounded-2xl h-auto"
             >
-              <TabsTrigger value="posts" asChild>
+              <TabsTrigger value="posts" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
                 <Link href={`?tab=posts`} replace scroll={false}>Posts</Link>
               </TabsTrigger>
-              <TabsTrigger value="members" asChild>
+              <TabsTrigger value="members" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
                 <Link href={`?tab=members`} replace scroll={false}>Members</Link>
               </TabsTrigger>
-              <TabsTrigger value="selections" asChild>
+              <TabsTrigger value="selections" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
                 <Link href={`?tab=selections`} replace scroll={false}>Selections</Link>
               </TabsTrigger>
-              <TabsTrigger value="highlights" asChild>
+              <TabsTrigger value="highlights" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
                 <Link href={`?tab=highlights`} replace scroll={false}>Highlights</Link>
               </TabsTrigger>
-              <TabsTrigger value="activities" asChild>
+              <TabsTrigger value="activities" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
                 <Link href={`?tab=activities`} replace scroll={false}>Activities</Link>
               </TabsTrigger>
-              <TabsTrigger value="programs" asChild>
+              <TabsTrigger value="programs" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
                 <Link href={`?tab=programs`} replace scroll={false}>Programs</Link>
               </TabsTrigger>
-              <TabsTrigger value="events" asChild>
+              <TabsTrigger value="events" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
                 <Link href={`?tab=events`} replace scroll={false}>Events</Link>
               </TabsTrigger>
-              <TabsTrigger value="gallery" asChild>
+              <TabsTrigger value="gallery" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
                 <Link href={`?tab=gallery`} replace scroll={false}>Gallery</Link>
               </TabsTrigger>
-            </TabsList>
+            </ScrollableTabsList>
 
             <TabsContent value="posts">
               <OrganizationFeed organization={organization} isAdmin={isAdmin} />

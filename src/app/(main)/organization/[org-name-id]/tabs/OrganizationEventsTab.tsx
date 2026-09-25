@@ -281,7 +281,7 @@ export function OrganizationEventsTab({
       <div className="space-y-4 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-            <TabsList className="rounded-xl p-1 bg-muted/50 border">
+            <TabsList className="rounded-xl p-1 bg-muted/50 border overflow-x-auto no-scrollbar scrollbar-none flex-nowrap w-full sm:w-auto justify-start sm:justify-center">
               <TabsTrigger value="all-events" className="rounded-lg text-xs font-bold px-3">
                 All Gatherings ({totalEvents})
               </TabsTrigger>

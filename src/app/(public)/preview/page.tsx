@@ -5,6 +5,7 @@ import {
     Tabs,
     TabsContent,
     TabsList,
+    ScrollableTabsList,
     TabsTrigger,
 } from "@/components/ui/tabs-new";
 
@@ -41,14 +42,14 @@ export default async function PreviewPage({ searchParams }: PreviewPageProps) {
                         <div className="h-full px-4 py-6 lg:px-8">
                             <Tabs defaultValue="music" className="h-full space-y-6">
                                 <div className="space-between flex items-center">
-                                    <TabsList className="w-full !justify-start overflow-x-auto shadow-md">
+                                    <ScrollableTabsList className="w-full !justify-start shadow-md">
                                         <TabsTrigger value="music" className="relative">
                                             Music Library
                                         </TabsTrigger>
                                         <TabsTrigger value="selections">
                                             Curated Selections
                                         </TabsTrigger>
-                                    </TabsList>
+                                    </ScrollableTabsList>
                                 </div>
 
                                 {/* Music Tab */}

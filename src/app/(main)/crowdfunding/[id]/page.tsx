@@ -478,18 +478,18 @@ export default function CampaignDetailPage() {
 
         {/* Tabbed Detailed Experience */}
         <Tabs defaultValue="roadmap" className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full max-w-md h-10 rounded-2xl">
-            <TabsTrigger value="roadmap" className="gap-1.5 text-xs font-semibold rounded-xl">
-              <Layers className="h-3.5 w-3.5 text-amber-500" />
-              Escrow Roadmap
+          <TabsList className="flex sm:grid sm:grid-cols-3 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap w-full max-w-md h-auto p-1 rounded-2xl justify-start sm:justify-center">
+            <TabsTrigger value="roadmap" className="gap-1.5 text-xs font-semibold rounded-xl shrink-0 sm:shrink py-2">
+              <Layers className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <span>Escrow Roadmap</span>
             </TabsTrigger>
-            <TabsTrigger value="story" className="gap-1.5 text-xs font-semibold rounded-xl">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Project Story
+            <TabsTrigger value="story" className="gap-1.5 text-xs font-semibold rounded-xl shrink-0 sm:shrink py-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span>Project Story</span>
             </TabsTrigger>
-            <TabsTrigger value="backers" className="gap-1.5 text-xs font-semibold rounded-xl">
-              <Users className="h-3.5 w-3.5" />
-              Backers ({campaign.contributions.length})
+            <TabsTrigger value="backers" className="gap-1.5 text-xs font-semibold rounded-xl shrink-0 sm:shrink py-2">
+              <Users className="h-3.5 w-3.5 shrink-0" />
+              <span>Backers ({campaign.contributions.length})</span>
             </TabsTrigger>
           </TabsList>
 

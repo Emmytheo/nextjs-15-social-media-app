@@ -287,31 +287,31 @@ export default function EventsPage() {
       )}
 
       {/* Scope Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-muted/50 border border-border/60">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap p-1.5 rounded-2xl bg-muted/50 border border-border/60">
         <button
           onClick={() => setScope("all")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
             scope === "all"
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-background/40"
           }`}
         >
-          <Compass className="h-4 w-4 text-primary" />
+          <Compass className="h-4 w-4 text-primary shrink-0" />
           All Gatherings
         </button>
 
         <button
           onClick={() => setScope("my-guilds")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
             scope === "my-guilds"
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-background/40"
           }`}
         >
-          <ShieldCheck className="h-4 w-4 text-indigo-500" />
+          <ShieldCheck className="h-4 w-4 text-indigo-500 shrink-0" />
           My Guilds & Memberships
           {myGuildsEvents.length > 0 && (
-            <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-bold">
+            <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-bold shrink-0">
               {myGuildsEvents.length}
             </span>
           )}
@@ -319,25 +319,25 @@ export default function EventsPage() {
 
         <button
           onClick={() => setScope("attending")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
             scope === "attending"
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-background/40"
           }`}
         >
-          <Ticket className="h-4 w-4 text-emerald-500" />
+          <Ticket className="h-4 w-4 text-emerald-500 shrink-0" />
           My RSVPs / Attending
         </button>
 
         <button
           onClick={() => setScope("hosted")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
             scope === "hosted"
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-background/40"
           }`}
         >
-          <Building2 className="h-4 w-4 text-amber-500" />
+          <Building2 className="h-4 w-4 text-amber-500 shrink-0" />
           Hosted by My Guilds
         </button>
       </div>
@@ -392,9 +392,9 @@ export default function EventsPage() {
         <div className="flex flex-col gap-3 pt-2 border-t border-border/50">
           <div className="flex flex-wrap items-center justify-between gap-2">
             {/* Timeframe Selection */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1">
-                <CalendarDays className="h-3.5 w-3.5 text-primary" />
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap pb-0.5">
+              <span className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1 shrink-0 whitespace-nowrap">
+                <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
                 Schedule:
               </span>
               {TIMEFRAMES.map((tf) => (
@@ -403,7 +403,7 @@ export default function EventsPage() {
                   variant={timeframe === tf.value ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setTimeframe(tf.value)}
-                  className={`rounded-xl text-xs h-7 px-2.5 font-semibold ${
+                  className={`rounded-xl text-xs h-7 px-2.5 font-semibold shrink-0 whitespace-nowrap ${
                     timeframe === tf.value ? "border shadow-xs" : ""
                   }`}
                 >
@@ -417,7 +417,7 @@ export default function EventsPage() {
                 variant="ghost"
                 size="sm"
                 onClick={handleClearFilters}
-                className="text-xs text-muted-foreground hover:text-foreground h-7 gap-1"
+                className="text-xs text-muted-foreground hover:text-foreground h-7 gap-1 shrink-0"
               >
                 <X className="h-3.5 w-3.5" />
                 Reset Filters
@@ -426,7 +426,7 @@ export default function EventsPage() {
           </div>
 
           {/* Category Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap pb-1">
             {CATEGORIES.map((cat) => (
               <Button
                 key={cat.value}

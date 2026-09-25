@@ -1,11 +1,12 @@
 import TrendsSidebar from "@/components/TrendsSidebar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import FollowingFeed from "./FollowingFeed";
 import ForYouFeed from "./ForYouFeed";
 import { OrganizationFeed } from "@/app/(main)/organization/[org-name-id]/OrganizationFeed";
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import HomeHeroCarousel from "./HomeHeroCarousel";
+import HomeFeedTabsList from "./HomeFeedTabsList";
 import PostEditor from "@/components/posts/editor/PostEditor";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -97,41 +98,7 @@ export default async function Home() {
 
         {/* Main Feed Tabs */}
         <Tabs defaultValue="for-you" className="w-full">
-          <TabsList className="sticky top-[70px] z-10 flex w-full flex-wrap sm:w-auto sm:inline-flex justify-start gap-1.5 rounded-2xl border border-border/70 bg-card/95 p-1.5 backdrop-blur shadow-sm">
-            <TabsTrigger
-              value="for-you"
-              className="flex-1 sm:flex-initial rounded-xl px-4 py-2 text-xs sm:text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-            >
-              For You
-            </TabsTrigger>
-            <TabsTrigger
-              value="following"
-              className="flex-1 sm:flex-initial rounded-xl px-4 py-2 text-xs sm:text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-            >
-              Following
-            </TabsTrigger>
-
-            {/* Render a tab for each user organization */}
-            {userOrganizations.map((org) => (
-              <TabsTrigger
-                key={org.id}
-                value={`org-${org.id}`}
-                className="flex-1 sm:flex-initial rounded-xl px-4 py-2 text-xs sm:text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all truncate max-w-[170px]"
-                title={org.name}
-              >
-                {org.name}
-              </TabsTrigger>
-            ))}
-
-            {userOrganizations.length === 0 && (
-              <TabsTrigger
-                value="explore-guilds"
-                className="flex-1 sm:flex-initial rounded-xl px-4 py-2 text-xs sm:text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-              >
-                Guilds
-              </TabsTrigger>
-            )}
-          </TabsList>
+          <HomeFeedTabsList userOrganizations={userOrganizations} />
 
           <TabsContent value="for-you" className="mt-4">
             <ForYouFeed />

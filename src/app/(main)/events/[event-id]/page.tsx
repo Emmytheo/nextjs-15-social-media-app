@@ -1,6 +1,6 @@
 import { validateRequest } from "@/auth";
 import Linkify from "@/components/Linkify";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, ScrollableTabsList, TabsTrigger } from "@/components/ui/tabs";
 import prisma from "@/lib/prisma";
 import { formatDate } from "date-fns";
 import { Metadata } from "next";
@@ -136,23 +136,23 @@ export default async function Page({ params, searchParams }: PageProps) {
           isRegistered={isRegistered}
         />
         <Tabs defaultValue={currentTab} className="w-full">
-          <TabsList
-            className="sticky top-[70px] z-10 w-full !justify-start overflow-x-auto shadow-md bg-background/95 dark:bg-muted backdrop-blur supports-[backdrop-filter]:bg-background/60"
-            style={{ scrollbarWidth: "none" }}
+          <ScrollableTabsList
+            containerClassName="sticky top-[70px] z-10 rounded-2xl shadow-sm"
+            className="w-full !justify-start bg-card/95 backdrop-blur-md border border-border/70 p-1.5 rounded-2xl h-auto"
           >
-            <TabsTrigger value="overview" asChild>
+            <TabsTrigger value="overview" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
               <Link href="?tab=overview" replace scroll={false}>Overview</Link>
             </TabsTrigger>
-            <TabsTrigger value="tickets" asChild>
+            <TabsTrigger value="tickets" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
               <Link href="?tab=tickets" replace scroll={false}>Tickets</Link>
             </TabsTrigger>
-            <TabsTrigger value="activities" asChild>
+            <TabsTrigger value="activities" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
               <Link href="?tab=activities" replace scroll={false}>Activities</Link>
             </TabsTrigger>
-            <TabsTrigger value="gallery" asChild>
+            <TabsTrigger value="gallery" asChild className="rounded-xl px-4 py-2 font-bold text-xs sm:text-sm">
               <Link href="?tab=gallery" replace scroll={false}>Gallery</Link>
             </TabsTrigger>
-          </TabsList>
+          </ScrollableTabsList>
 
           <TabsContent value="overview" className="space-y-4">
             <div className="rounded-2xl bg-card p-6 shadow-sm">

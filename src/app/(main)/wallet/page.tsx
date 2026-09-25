@@ -551,12 +551,12 @@ export default function WalletPage() {
               </p>
             </div>
 
-            <Tabs value={filterType} onValueChange={setFilterType} className="w-auto">
-              <TabsList className="grid grid-cols-4 h-9 text-xs rounded-xl">
-                <TabsTrigger value="ALL">All</TabsTrigger>
-                <TabsTrigger value="DEPOSITS">Deposits</TabsTrigger>
-                <TabsTrigger value="TRANSFERS">Transfers</TabsTrigger>
-                <TabsTrigger value="ESCROW">Escrow</TabsTrigger>
+            <Tabs value={filterType} onValueChange={setFilterType} className="w-full sm:w-auto">
+              <TabsList className="flex sm:grid sm:grid-cols-4 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap h-9 text-xs rounded-xl p-1 justify-start sm:justify-center">
+                <TabsTrigger value="ALL" className="shrink-0 sm:shrink">All</TabsTrigger>
+                <TabsTrigger value="DEPOSITS" className="shrink-0 sm:shrink">Deposits</TabsTrigger>
+                <TabsTrigger value="TRANSFERS" className="shrink-0 sm:shrink">Transfers</TabsTrigger>
+                <TabsTrigger value="ESCROW" className="shrink-0 sm:shrink">Escrow</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

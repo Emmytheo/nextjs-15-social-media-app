@@ -303,17 +303,17 @@ export function CommunitiesTable({ data, hasManagedOrgs }: CommunitiesTableProps
         onValueChange={(val) => setActiveTab(val as "managed" | "member" | "all")}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:inline-flex bg-muted/60 p-1 rounded-xl">
-          <TabsTrigger value="managed" className="rounded-lg text-xs gap-1.5 font-semibold">
-            <Crown className="size-3.5 text-amber-500" />
+        <TabsList className="flex w-full overflow-x-auto no-scrollbar scrollbar-none flex-nowrap sm:w-auto sm:inline-flex bg-muted/60 p-1 rounded-xl justify-start sm:justify-center">
+          <TabsTrigger value="managed" className="rounded-lg text-xs gap-1.5 font-semibold shrink-0 whitespace-nowrap">
+            <Crown className="size-3.5 text-amber-500 shrink-0" />
             <span>My Admin Guilds ({managedCount})</span>
           </TabsTrigger>
-          <TabsTrigger value="member" className="rounded-lg text-xs gap-1.5 font-semibold">
-            <UserCheck className="size-3.5 text-blue-500" />
+          <TabsTrigger value="member" className="rounded-lg text-xs gap-1.5 font-semibold shrink-0 whitespace-nowrap">
+            <UserCheck className="size-3.5 text-blue-500 shrink-0" />
             <span>My Memberships ({memberCount})</span>
           </TabsTrigger>
-          <TabsTrigger value="all" className="rounded-lg text-xs gap-1.5 font-semibold">
-            <Building2 className="size-3.5 text-muted-foreground" />
+          <TabsTrigger value="all" className="rounded-lg text-xs gap-1.5 font-semibold shrink-0 whitespace-nowrap">
+            <Building2 className="size-3.5 text-muted-foreground shrink-0" />
             <span>All Communities ({data.length})</span>
           </TabsTrigger>
         </TabsList>

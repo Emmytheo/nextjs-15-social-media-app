@@ -197,19 +197,19 @@ export default function OrganizationsPage() {
       )}
 
       {/* Scope Navigation Switcher */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-muted/50 border border-border/60">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap p-1.5 rounded-2xl bg-muted/50 border border-border/60">
         <button
           onClick={() => setScope("all")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
             scope === "all"
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-background/40"
           }`}
         >
-          <Compass className="h-4 w-4 text-primary" />
+          <Compass className="h-4 w-4 text-primary shrink-0" />
           All Community Guilds
           {referenceList.length > 0 && (
-            <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-muted font-bold text-muted-foreground">
+            <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-muted font-bold text-muted-foreground shrink-0">
               {referenceList.length}
             </span>
           )}
@@ -217,16 +217,16 @@ export default function OrganizationsPage() {
 
         <button
           onClick={() => setScope("my-guilds")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
             scope === "my-guilds"
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-background/40"
           }`}
         >
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+          <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
           My Guilds & Memberships
           {myGuildsCount > 0 && (
-            <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">
+            <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
               {myGuildsCount}
             </span>
           )}
@@ -234,16 +234,16 @@ export default function OrganizationsPage() {
 
         <button
           onClick={() => setScope("managed")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
             scope === "managed"
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-background/40"
           }`}
         >
-          <Crown className="h-4 w-4 text-amber-500" />
+          <Crown className="h-4 w-4 text-amber-500 shrink-0" />
           Guilds I Steward (Admin)
           {managedCount > 0 && (
-            <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold">
+            <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold shrink-0">
               {managedCount}
             </span>
           )}
