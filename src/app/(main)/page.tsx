@@ -154,7 +154,7 @@ export default async function Home() {
                   <Building2 className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold">You haven't joined a community guild yet</h3>
+                  <h3 className="text-base font-bold">You haven&apos;t joined a community guild yet</h3>
                   <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                     Guilds allow you to pool treasury funds, organize events, and manage collective crowdfunding schemes.
                   </p>
