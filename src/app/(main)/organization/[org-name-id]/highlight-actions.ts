@@ -137,3 +137,43 @@ export async function updateOrganizationHighlight(
 
   return updatedHighlight;
 }
+
+export async function toggleHighlightLike(highlightId: string): Promise<{ isLiked: boolean; likesCount: number }> {
+  const { user } = await validateRequest();
+
+  if (!user) throw new Error("Unauthorized");
+
+  const existingLike = await prisma.organizationHighlightLike.findUnique({
+    where: {
+      userId_highlightId: {
+        userId: user.id,
+        highlightId,
+      },
+    },
+  });
+
+  if (existingLike) {
+    await prisma.organizationHighlightLike.delete({
+      where: {
+        userId_highlightId: {
+          userId: user.id,
+          highlightId,
+        },
+      },
+    });
+  } else {
+    await prisma.organizationHighlightLike.create({
+      data: {
+        userId: user.id,
+        highlightId,
+      },
+    });
+  }
+
+  const count = await prisma.organizationHighlightLike.count({
+    where: { highlightId },
+  });
+
+  return { isLiked: !existingLike, likesCount: count };
+}
+

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrganizationActivityForm } from "../OrganizationActivityForm";
+import { ActivityJoinButton } from "./ActivityJoinButton";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import kyInstance from "@/lib/ky";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
@@ -111,7 +112,12 @@ export function ActivitiesTab({ organization, isAdmin }: ActivitiesTabProps) {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <CardTitle className="text-lg leading-tight">{activity.title}</CardTitle>
+                          <Link
+                            href={`/organization/${organization.id}/activities/${activity.id}`}
+                            className="hover:text-primary transition-colors"
+                          >
+                            <CardTitle className="text-lg leading-tight">{activity.title}</CardTitle>
+                          </Link>
                           <Badge variant="secondary" className="text-xs">
                             {activity.type}
                           </Badge>
@@ -126,7 +132,7 @@ export function ActivitiesTab({ organization, isAdmin }: ActivitiesTabProps) {
                             <Avatar className="w-5 h-5">
                               <AvatarImage src={activity.user.avatarUrl || undefined} />
                               <AvatarFallback className="text-xs">
-                                {activity.user.displayName.slice(0, 2)}
+                                {(activity.user.displayName || activity.user.username || "U").slice(0, 2)}
                               </AvatarFallback>
                             </Avatar>
                             <span>{activity.user.displayName}</span>
@@ -168,9 +174,7 @@ export function ActivitiesTab({ organization, isAdmin }: ActivitiesTabProps) {
                       </p>
                     )}
                     <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <Button variant="ghost" size="sm">
-                        Join Activity
-                      </Button>
+                      <ActivityJoinButton activityId={activity.id} />
                       <Button variant="ghost" size="sm" asChild>
                         <Link href={`/organization/${organization.id}/activities/${activity.id}`}>
                           View Details
@@ -189,7 +193,7 @@ export function ActivitiesTab({ organization, isAdmin }: ActivitiesTabProps) {
               <p className="text-muted-foreground mb-4">
                 Activities will showcase events, workshops, and gatherings organized by {organization.name}.
               </p>
-              <OrganizationActivityForm organizationId={organization.id} />
+              {isAdmin && <OrganizationActivityForm organizationId={organization.id} />}
             </Card>
           )}
         </div>

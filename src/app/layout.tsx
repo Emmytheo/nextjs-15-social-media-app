@@ -19,10 +19,10 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Community Platform",
-    default: "Community Platform",
+    template: "%s | CommunityOS",
+    default: "CommunityOS — The Multi-Tenant Community Operating System",
   },
-  description: "Diverse, multicommunity system for all types of organizations, groups and communities.",
+  description: "Next-generation multi-tenant community platform with social feeds, events, milestone escrow crowdfunding, and treasury management.",
 };
 
 export const viewport: Viewport = {

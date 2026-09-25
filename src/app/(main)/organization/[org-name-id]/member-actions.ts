@@ -236,12 +236,16 @@ export async function getPendingInvitation(organizationId: string) {
     },
   });
 
+  if (existingMembership) {
+    return null;
+  }
+
   const notification = await prisma.notification.findFirst({
     where: {
       recipientId: user.id,
       organizationId,
       type: "ORGANIZATION_INVITE",
-      read: existingMembership ? false : true,
+      read: false,
     },
     select: {
       id: true,
@@ -250,4 +254,101 @@ export async function getPendingInvitation(organizationId: string) {
 
   return notification;
 }
+
+export async function declineOrganizationInvitation(notificationId: string): Promise<{ success: boolean; message: string }> {
+  const { user } = await validateRequest();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  const notification = await prisma.notification.findUnique({
+    where: { id: notificationId },
+  });
+
+  if (!notification || notification.type !== "ORGANIZATION_INVITE") {
+    throw new Error("Invalid invitation");
+  }
+
+  if (notification.recipientId !== user.id) {
+    throw new Error("Unauthorized to decline this invitation");
+  }
+
+  await prisma.notification.update({
+    where: { id: notificationId },
+    data: { read: true },
+  });
+
+  return { success: true, message: "Invitation declined" };
+}
+
+export async function joinOrganization(organizationId: string): Promise<{ success: boolean; message: string }> {
+  const { user } = await validateRequest();
+  if (!user) throw new Error("Unauthorized");
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    include: {
+      members: { where: { userId: user.id } },
+    },
+  });
+
+  if (!organization) throw new Error("Organization not found");
+
+  if (organization.members.length > 0) {
+    return { success: true, message: "Already a member of this organization" };
+  }
+
+  await prisma.organizationMember.create({
+    data: {
+      userId: user.id,
+      organizationId,
+      joinedAt: new Date(),
+    },
+  });
+
+  return { success: true, message: `Welcome to ${organization.name}!` };
+}
+
+export async function leaveOrganization(organizationId: string): Promise<{ success: boolean; message: string }> {
+  const { user } = await validateRequest();
+  if (!user) throw new Error("Unauthorized");
+
+  const adminCount = await prisma.organizationAdmin.count({
+    where: { organizationId },
+  });
+
+  const isAdmin = await prisma.organizationAdmin.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: user.id,
+        organizationId,
+      },
+    },
+  });
+
+  if (isAdmin && adminCount <= 1) {
+    throw new Error("You cannot leave as the sole administrator. Appoint another admin first.");
+  }
+
+  await prisma.organizationMember.deleteMany({
+    where: {
+      userId: user.id,
+      organizationId,
+    },
+  });
+
+  if (isAdmin) {
+    await prisma.organizationAdmin.deleteMany({
+      where: {
+        userId: user.id,
+        organizationId,
+      },
+    });
+  }
+
+  return { success: true, message: "You have left the organization." };
+}
+
+
 

@@ -3,20 +3,24 @@ import { validateRequest } from "@/auth";
 import { createEventActivity } from "@/app/(main)/events/[event-id]/event-actions";
 import prisma from "@/lib/prisma";
 
-export async function GET(req: NextRequest, { params }: { params: { eventId: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ eventId: string }> | { eventId: string } }
+) {
   try {
     const { user } = await validateRequest();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { eventId } = await params;
     const { searchParams } = new URL(req.url);
     const cursor = searchParams.get("cursor");
     const limit = 10;
 
     const activities = await prisma.eventActivity.findMany({
       where: {
-        eventId: params.eventId,
+        eventId,
       },
       include: {
         user: {
@@ -50,15 +54,19 @@ export async function GET(req: NextRequest, { params }: { params: { eventId: str
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { eventId: string } }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ eventId: string }> | { eventId: string } }
+) {
   try {
+    const { eventId } = await params;
     const body = await req.json();
-    const activity = await createEventActivity(params.eventId, body);
+    const activity = await createEventActivity(eventId, body);
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {
     console.error("Error creating event activity:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

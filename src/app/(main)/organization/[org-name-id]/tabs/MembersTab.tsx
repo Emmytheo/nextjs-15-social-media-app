@@ -20,7 +20,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { validateRequest } from "@/auth";
 import { User } from "lucia";
 import { RestrictedContent } from "../RestrictedContent";
 
@@ -145,7 +144,7 @@ export function MembersTab({ organization, loggedInUser, isAdmin }: MembersTabPr
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={member.user.avatarUrl || undefined} />
                         <AvatarFallback>
-                          {member.user.displayName.slice(0, 2).toUpperCase()}
+                          {(member.user.displayName || member.user.username || "U").slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">

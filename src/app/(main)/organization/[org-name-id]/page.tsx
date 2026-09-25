@@ -8,6 +8,7 @@ import { formatDate } from "date-fns";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { OrganizationProfile } from "./OrganizationProfile";
 import EditOrganizationButton from "./EditOrganizationButton";
 import { OrganizationFeed } from "./OrganizationFeed";
 import { OrganizationSidebar } from "@/components/OrganizationSidebar";
@@ -19,19 +20,19 @@ import { OrganizationEventsTab } from "./tabs/OrganizationEventsTab";
 import { GalleryTab } from "./tabs/GalleryTab";
 import Image from "next/image";
 import { ProgramsTab } from "./tabs/ProgramsTab";
-import { EventsTab } from "./tabs/EventsTab";
 import { EventWithDetails } from "../../events/[event-id]/page";
-import { Building2, Calendar, Users, FileText, Edit } from "lucide-react";
+import { Building2, Calendar, Users, FileText } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { OrganizationFab } from "./OrganizationFab";
 import InvitationBanner from "./InvitationBanner";
 import { getPendingInvitation } from "./member-actions";
 
 interface PageProps {
-  params: { "org-name-id": string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ "org-name-id": string }> | { "org-name-id": string };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }> | { [key: string]: string | string[] | undefined };
 }
+
+export type { OrganizationProfileProps } from "./OrganizationProfile";
 
 export interface OrganizationWithCounts {
   [x: string]: any;
@@ -50,7 +51,7 @@ export interface OrganizationWithCounts {
   };
   members: Array<{
     userId: string;
-    role: string;
+    role?: string;
   }>;
   admins: Array<{
     userId: string;
@@ -69,6 +70,7 @@ const getOrganization = cache(
       include: {
         events: {
           select: {
+            id: true,
             title: true,
             description: true,
             category: true,
@@ -77,10 +79,13 @@ const getOrganization = cache(
             location: true,
             venue: true,
             address: true,
+            coverPhotoUrl: true,
+            logoUrl: true,
             ticketType: true,
             ticketPrice: true,
             ticketUrl: true,
             programmeOverview: true,
+            status: true,
             organizationId: true,
           },
         },
@@ -97,16 +102,11 @@ const getOrganization = cache(
           },
           select: {
             userId: true,
-            // role: true,
           },
         },
         admins: {
-          // where: {
-          //   // userId: loggedInUserId,
-          // },
           select: {
             userId: true,
-            // role: true,
           },
         },
       },
@@ -119,35 +119,41 @@ const getOrganization = cache(
 );
 
 export async function generateMetadata({
-  params: { "org-name-id": orgNameOrId },
+  params,
 }: PageProps): Promise<Metadata> {
   const { user: loggedInUser } = await validateRequest();
+  const resolvedParams = await params;
+  const orgNameOrId = resolvedParams["org-name-id"];
 
-  if (!loggedInUser) return {};
-
-  const organization = await getOrganization(orgNameOrId, loggedInUser.id);
+  const organization = await getOrganization(orgNameOrId, loggedInUser?.id || "");
 
   return {
-    title: `${organization.name}`,
+    title: `${organization.name} - Organization Hub`,
+    description: organization.description || `Explore ${organization.name} community hub`,
   };
 }
 
 export default async function Page({
-  params: { "org-name-id": orgNameOrId },
+  params,
   searchParams,
 }: PageProps) {
   const { user: loggedInUser } = await validateRequest();
 
-  // Allow public access, but loggedInUser will be null if not signed in
+  const resolvedParams = await params;
+  const orgNameOrId = resolvedParams["org-name-id"];
+  const resolvedSearchParams = await searchParams;
 
   const organization = await getOrganization(orgNameOrId, loggedInUser?.id ?? "");
 
-  const isAdmin = loggedInUser ? organization.admins.some(a => a.userId === loggedInUser.id) : false;
+  const isAdmin = loggedInUser
+    ? organization.admins.some((a) => a.userId === loggedInUser.id)
+    : false;
 
+  const pendingInvitation = loggedInUser
+    ? await getPendingInvitation(organization.id)
+    : null;
 
-  const pendingInvitation = loggedInUser ? await getPendingInvitation(organization.id) : null;
-
-  const tabParam = searchParams.tab;
+  const tabParam = resolvedSearchParams.tab;
   const currentTab = (Array.isArray(tabParam) ? tabParam[0] : tabParam) || "posts";
 
   return (
@@ -162,7 +168,7 @@ export default async function Page({
 
           <Tabs defaultValue={currentTab}>
             <TabsList
-              className="w-full !justify-start overflow-x-auto sticky top-[70px] shadow-md z-10"
+              className="w-full !justify-start overflow-x-auto sticky top-[70px] shadow-md z-10 bg-card"
               style={{ scrollbarWidth: "none" }}
             >
               <TabsTrigger value="posts" asChild>
@@ -219,108 +225,9 @@ export default async function Page({
         </div>
         <OrganizationSidebar organization={organization} />
       </div>
-    </main>
-  );
-}
-
-export interface OrganizationProfileProps {
-  organization: OrganizationWithCounts;
-  loggedInUserId: string | undefined;
-}
-
-function OrganizationProfile({
-  organization,
-  loggedInUserId,
-}: OrganizationProfileProps) {
-  const isMember = organization.members.length > 0;
-  const isAdmin = organization.admins.some(a => a.userId === loggedInUserId);
-
-  return (
-    <div className="flex w-full flex-col">
-      <div className="relative h-32 md:h-36 w-full flex-shrink-0 overflow-hidden rounded-t-2xl bg-muted">
-        {organization.logoUrl ? (
-          // Using logo as cover for now if no cover photo exists
-          // In a real app, we'd want a separate cover photo field
-          <div className="absolute inset-0 bg-primary/10 backdrop-blur-3xl">
-            <Image
-              src={organization.logoUrl}
-              alt={`${organization.name} cover`}
-              fill
-              className="object-cover opacity-50 blur-xl scale-110"
-            />
-          </div>
-        ) : (
-          <div className="w-full h-full bg-gradient-to-r from-primary/20 to-primary/10 flex items-center justify-center">
-            <Building2 className="w-16 h-16 text-primary/40" />
-          </div>
-        )}
-      </div>
-
-      <div className="relative flex w-full flex-col gap-5 rounded-b-2xl bg-card p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-3 md:gap-6">
-          <div className="relative -mt-16 md:-mt-20 flex-shrink-0">
-            <div className="h-24 w-24 md:h-32 md:w-32 rounded-full border-4 border-card bg-muted overflow-hidden shadow-sm relative">
-              {!organization.logoUrl ? (
-                <Image
-                  src={organization.logoUrl || "/img/icon.png"}
-                  alt={`${organization.name} logo`}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-secondary text-secondary-foreground">
-                  <span className="text-2xl font-bold">{organization.name.substring(0, 2).toUpperCase()}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex-1 space-y-2 pt-2">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl md:text-2xl font-bold tracking-tight">{organization.name}</h1>
-                <div className="text-md text-muted-foreground font-medium">
-                  @{organization.id}
-                </div>
-              </div>
-
-              <div className="hidden md:block">
-                {isAdmin && <EditOrganizationButton organization={organization} />}
-              </div>
-            </div>
-
-
-          </div>
-        </div>
-        <div className="flex flex-wrap md:justify-center gap-4 text-sm text-muted-foreground mt-2">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-primary" />
-            <span>Created {formatDate(organization.createdAt, "MMM d, yyyy")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
-            <span>{formatNumber(organization._count.members)} Member(s)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-primary" />
-            <span>{formatNumber(organization._count.posts)} Post(s)</span>
-          </div>
-        </div>
-        {organization.description && (
-          <>
-            <Separator />
-            <Linkify>
-              <div className="overflow-hidden whitespace-pre-line break-words text-sm leading-relaxed">
-                {organization.description}
-              </div>
-            </Linkify>
-          </>
-        )}
-      </div>
-
       {isAdmin && (
         <OrganizationFab organization={organization} isAdmin={isAdmin} />
       )}
-    </div>
+    </main>
   );
 }

@@ -1,25 +1,28 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import Image from "next/image"
 import {
-  CircleArrowUp,
-  ChartBar,
-  Camera,
-  ClipboardList,
-  Database,
-  FileCode,
-  File,
-  FileText,
-  Folder,
-  CircleHelp,
+  Building2,
+  Calendar,
+  Home,
   LayoutDashboard,
-  List,
-  Search,
+  MessageSquare,
+  Music,
+  Bell,
+  Bookmark,
   Settings,
-  Users,
+  CircleHelp,
+  Music2,
+  Radio,
+  Wallet,
+  Coins,
+  Crown,
+  ChevronRight,
+  ExternalLink,
 } from "lucide-react"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -31,126 +34,90 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
 } from "@/components/ui/sidebar"
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
+      title: "Platform Overview",
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: List,
+      title: "Global Feed",
+      url: "/",
+      icon: Home,
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: ChartBar,
+      title: "Communities Hub",
+      url: "/organization",
+      icon: Building2,
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: Folder,
+      title: "Events Gathering",
+      url: "/events",
+      icon: Calendar,
     },
     {
-      title: "Team",
-      url: "#",
-      icon: Users,
+      title: "Crowdfunding Grants",
+      url: "/crowdfunding",
+      icon: Coins,
+    },
+    {
+      title: "Fintech Vault & Escrow",
+      url: "/wallet",
+      icon: Wallet,
+    },
+    {
+      title: "Messages",
+      url: "/messages",
+      icon: MessageSquare,
+    },
+    {
+      title: "Notifications",
+      url: "/notifications",
+      icon: Bell,
+    },
+    {
+      title: "Bookmarks",
+      url: "/bookmarks",
+      icon: Bookmark,
     },
   ],
-  navClouds: [
+  navCreative: [
     {
-      title: "Capture",
-      icon: Camera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Sol2Snd Engine",
+      url: "/sol2snd",
+      icon: Radio,
     },
     {
-      title: "Proposal",
-      icon: FileText,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: FileCode,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Music Studio",
+      url: "/music",
+      icon: Music2,
     },
   ],
   navSecondary: [
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: Settings,
     },
     {
-      title: "Get Help",
+      title: "Help & Documentation",
       url: "#",
       icon: CircleHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: Search,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: Database,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: ClipboardList,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: File,
     },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  managedCommunities?: Array<{ id: string; name: string; logoUrl: string | null }>;
+}
+
+export function AppSidebar({ managedCommunities = [], ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -160,19 +127,67 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
-                <CircleArrowUp className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-amber-500 text-primary-foreground shadow-sm">
+                  <span className="font-black text-xs">OS</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold leading-none">CommunityOS</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">Platform Console</span>
+                </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
+        {/* Managed Communities Section (when user is an admin of guilds) */}
+        {managedCommunities.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
+              <span className="flex items-center gap-1.5">
+                <Crown className="size-3.5" />
+                My Admin Guilds ({managedCommunities.length})
+              </span>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {managedCommunities.map((org) => (
+                  <SidebarMenuItem key={org.id}>
+                    <SidebarMenuButton asChild tooltip={`Manage ${org.name}`}>
+                      <Link href={`/dashboard/organization/${org.id}`} className="flex items-center gap-2 text-xs font-semibold">
+                        <div className="flex size-5 shrink-0 items-center justify-center rounded-md bg-primary/10 overflow-hidden border border-border/60">
+                          {org.logoUrl ? (
+                            <Image src={org.logoUrl} alt={org.name} width={20} height={20} className="object-cover size-full" />
+                          ) : (
+                            <Building2 className="size-3 text-primary" />
+                          )}
+                        </div>
+                        <span className="truncate">{org.name}</span>
+                        <ChevronRight className="size-3 ml-auto opacity-40" />
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+
+        {/* Creative Tools section */}
+        <div className="mt-2">
+          <NavMain
+            items={data.navCreative}
+            label="Creative Tools"
+          />
+        </div>
+
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
+
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>

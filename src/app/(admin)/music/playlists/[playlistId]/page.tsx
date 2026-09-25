@@ -8,7 +8,9 @@ import { getPlaylists } from "../../actions";
 import { validateRequest } from "@/auth";
 
 interface PlaylistPageProps {
-  params: {
+  params: Promise<{
+    playlistId: string;
+  }> | {
     playlistId: string;
   };
 }
@@ -18,8 +20,9 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,
 }: PlaylistPageProps): Promise<Metadata> {
+  const { playlistId } = await params;
   const playlist = await prisma.playlist.findUnique({
-    where: { id: params.playlistId },
+    where: { id: playlistId },
   });
 
   if (!playlist) {
@@ -35,8 +38,9 @@ export async function generateMetadata({
 }
 
 export default async function PlaylistPage({ params }: PlaylistPageProps) {
+  const { playlistId } = await params;
   const playlist = await prisma.playlist.findUnique({
-    where: { id: params.playlistId },
+    where: { id: playlistId },
     include: {
       songs: {
         include: {

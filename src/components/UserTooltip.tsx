@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PropsWithChildren } from "react";
 import FollowButton from "./FollowButton";
 import FollowerCount from "./FollowerCount";
+import FollowingCount from "./FollowingCount";
 import Linkify from "./Linkify";
 import {
   Tooltip,
@@ -58,7 +59,14 @@ export default function UserTooltip({ children, user }: UserTooltipProps) {
                 </div>
               </Linkify>
             )}
-            <FollowerCount userId={user.id} initialState={followerState} />
+            <div className="flex items-center gap-3 text-xs">
+              <FollowerCount userId={user.id} initialState={followerState} />
+              <span>•</span>
+              <FollowingCount
+                userId={user.id}
+                followingCount={user._count.following}
+              />
+            </div>
           </div>
         </TooltipContent>
       </Tooltip>

@@ -1,8 +1,12 @@
 import { validateRequest } from "@/auth";
-import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
 import MenuBar from "./MenuBar";
 import Navbar from "./Navbar";
 import SessionProvider from "./SessionProvider";
+import MobileNav from "@/components/MobileNav";
+
+import { MenuBarProvider } from "@/components/MenuBarContext";
+import MenuBarWrapper from "@/components/MenuBarWrapper";
 
 export default async function Layout({
   children,
@@ -11,18 +15,36 @@ export default async function Layout({
 }) {
   const session = await validateRequest();
 
-  // if (!session.user) redirect("/login");
+  let unreadNotificationsCount = 0;
+  if (session.user) {
+    try {
+      unreadNotificationsCount = await prisma.notification.count({
+        where: {
+          recipientId: session.user.id,
+          read: false,
+        },
+      });
+    } catch (e) {
+      console.error("Error fetching notification count for MobileNav:", e);
+    }
+  }
 
   return (
     <SessionProvider value={session}>
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <div className="mx-auto flex w-full max-w-7xl grow gap-5 p-3 md:p-5">
-          <MenuBar className="sticky top-[5.25rem] hidden h-fit flex-none space-y-3 rounded-2xl bg-card px-3 py-5 shadow-sm sm:block lg:px-5 xl:w-80" />
-          {children}
+      <MenuBarProvider>
+        <div className="flex min-h-screen flex-col">
+          <Navbar />
+          <div className="mx-auto flex w-full max-w-7xl grow gap-5 px-2.5 sm:px-4 md:px-5 py-3 md:py-5 pb-24 sm:pb-6">
+            <MenuBarWrapper>
+              <MenuBar className="space-y-3" />
+            </MenuBarWrapper>
+            <div className="w-full min-w-0 flex-1">
+              {children}
+            </div>
+          </div>
+          <MobileNav unreadNotificationsCount={unreadNotificationsCount} />
         </div>
-        <MenuBar className="sticky bottom-0 flex w-full justify-center gap-5 border-t bg-card p-3 sm:hidden" />
-      </div>
+      </MenuBarProvider>
     </SessionProvider>
   );
 }

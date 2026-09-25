@@ -14,6 +14,7 @@ import UserAvatar from "../UserAvatar";
 import UserTooltip from "../UserTooltip";
 import BookmarkButton from "./BookmarkButton";
 import LikeButton from "./LikeButton";
+import MediaLightbox from "./MediaLightbox";
 import PostMoreButton from "./PostMoreButton";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
@@ -29,6 +30,7 @@ export default function Post({ post, type = "post", organization }: PostProps) {
   const { user } = useSession();
 
   const [showComments, setShowComments] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   return (
     <article className="group/post space-y-3 rounded-2xl bg-card p-5 shadow-sm">
@@ -58,9 +60,12 @@ export default function Post({ post, type = "post", organization }: PostProps) {
               </Link>
             ) : (
               <span className="flex w-full items-center gap-2 text-sm text-muted-foreground">
-                {organization &&
-                  <div className="flex m-0 items-center gap-2">{organization?.name}
-                    <span>•</span> </div>}
+                {organization && (
+                  <div className="m-0 flex items-center gap-2">
+                    {organization?.name}
+                    <span>•</span>{" "}
+                  </div>
+                )}
                 {formatRelativeDate(post.createdAt)}
               </span>
             )}
@@ -77,9 +82,12 @@ export default function Post({ post, type = "post", organization }: PostProps) {
         <div className="whitespace-pre-line break-words">{post.content}</div>
       </Linkify>
       {!!post.attachments.length && (
-        <MediaPreviews attachments={post.attachments} />
+        <MediaPreviews
+          attachments={post.attachments}
+          onImageClick={(url) => setLightboxUrl(url)}
+        />
       )}
-      <hr className="text-muted-foreground" />
+      <hr className="text-muted-foreground/30" />
       <div className="flex justify-between gap-5">
         <div className="flex items-center gap-5">
           <LikeButton
@@ -99,41 +107,47 @@ export default function Post({ post, type = "post", organization }: PostProps) {
             postId={post.id}
             initialState={{
               isBookmarkedByUser:
-                post.bookmarks &&
+                !!post.bookmarks &&
                 post.bookmarks.some((bookmark) => bookmark.userId === user?.id),
             }}
           />
         )}
       </div>
       {showComments && <Comments post={post} type={type} />}
+
+      <MediaLightbox
+        url={lightboxUrl}
+        onClose={() => setLightboxUrl(null)}
+      />
     </article>
   );
 }
 
 interface MediaPreviewsProps {
   attachments: Media[];
+  onImageClick?: (url: string) => void;
 }
 
-function MediaPreviews({ attachments }: MediaPreviewsProps) {
+function MediaPreviews({ attachments, onImageClick }: MediaPreviewsProps) {
   return (
     <div className={cn("flex w-full")}>
-      <div className="flex md:hidden">
-        <Splide options={{ rewind: true, arrows: false, loop: true }}>
+      <div className="flex w-full md:hidden">
+        <Splide options={{ rewind: true, arrows: false, loop: true }} className="w-full">
           {attachments.map((m) => (
             <SplideSlide key={m.id}>
-              <MediaPreview media={m} />
+              <MediaPreview media={m} onImageClick={onImageClick} />
             </SplideSlide>
           ))}
         </Splide>
       </div>
       <div
         className={cn(
-          "hidden w-full gap-3 md:grid md:flex-col",
-          attachments.length > 1 && "sm:grid sm:grid-cols-2",
+          "hidden w-full gap-3 md:grid",
+          attachments.length > 1 && "sm:grid-cols-2",
         )}
       >
         {attachments.map((m) => (
-          <MediaPreview key={m.id} media={m} />
+          <MediaPreview key={m.id} media={m} onImageClick={onImageClick} />
         ))}
       </div>
     </div>
@@ -142,18 +156,32 @@ function MediaPreviews({ attachments }: MediaPreviewsProps) {
 
 interface MediaPreviewProps {
   media: Media;
+  onImageClick?: (url: string) => void;
 }
 
-function MediaPreview({ media }: MediaPreviewProps) {
+function MediaPreview({ media, onImageClick }: MediaPreviewProps) {
   if (media.type === "IMAGE") {
     return (
-      <Image
-        src={media.url}
-        alt="Attachment"
-        width={500}
-        height={500}
-        className="mx-auto size-fit max-h-[30rem] rounded-2xl"
-      />
+      <div
+        onClick={() => onImageClick?.(media.url)}
+        className="group/media relative cursor-pointer overflow-hidden rounded-2xl transition-transform hover:opacity-95"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onImageClick?.(media.url);
+          }
+        }}
+      >
+        <Image
+          src={media.url}
+          alt="Attachment"
+          width={500}
+          height={500}
+          className="mx-auto size-fit max-h-[30rem] rounded-2xl transition-transform duration-200 group-hover/media:scale-[1.01]"
+        />
+      </div>
     );
   }
 

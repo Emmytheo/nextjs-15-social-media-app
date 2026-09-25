@@ -5,48 +5,75 @@ import { validateRequest } from "@/auth";
 export async function GET(request: Request) {
   try {
     const session = await validateRequest();
-    if (!session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const currentUserId = session.user?.id;
+
+    const { searchParams } = new URL(request.url);
+    const scope = searchParams.get("scope"); // "all" | "my-guilds" | "managed"
+
+    let whereClause: any = {};
+    if (scope === "my-guilds") {
+      if (!currentUserId) return NextResponse.json([]);
+      whereClause = {
+        OR: [
+          { members: { some: { userId: currentUserId } } },
+          { admins: { some: { userId: currentUserId } } },
+        ],
+      };
+    } else if (scope === "managed") {
+      if (!currentUserId) return NextResponse.json([]);
+      whereClause = {
+        admins: { some: { userId: currentUserId } },
+      };
     }
 
     const organizations = await prisma.organization.findMany({
-      where: {
-        members: {
-          some: {
-            // userId: session.user.id,
-          },
-        },
-      },
+      where: whereClause,
       include: {
         members: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                displayName: true,
-                username: true,
-                avatarUrl: true,
-              },
-            },
+          select: {
+            userId: true,
           },
         },
         admins: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                displayName: true,
-                username: true,
-                avatarUrl: true,
-              },
-            },
+          select: {
+            userId: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+            events: true,
+            programs: true,
+            posts: true,
           },
         },
       },
+      orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(organizations);
+    const enriched = organizations.map((org) => {
+      const isAdmin = currentUserId ? org.admins.some((a) => a.userId === currentUserId) : false;
+      const isMember = currentUserId ? org.members.some((m) => m.userId === currentUserId) : false;
+      return {
+        id: org.id,
+        name: org.name,
+        description: org.description,
+        logoUrl: org.logoUrl,
+        bannerUrl: org.bannerUrl,
+        inviteCode: org.inviteCode,
+        createdAt: org.createdAt,
+        updatedAt: org.updatedAt,
+        isAdmin,
+        isMember: isMember || isAdmin,
+        userRole: isAdmin ? "ADMIN" : isMember ? "MEMBER" : null,
+        _count: org._count,
+        memberCount: org._count.members,
+      };
+    });
+
+    return NextResponse.json(enriched);
   } catch (error) {
+    console.error("Failed to fetch organizations:", error);
     return NextResponse.json(
       { error: "Failed to fetch organizations" },
       { status: 500 },
@@ -201,7 +228,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, description } = body;
+    const { name, description, logo, banner } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -214,6 +241,8 @@ export async function POST(request: Request) {
       data: {
         name,
         description,
+        logoUrl: logo || null,
+        bannerUrl: banner || null,
         members: {
           create: {
             userId: session.user.id,

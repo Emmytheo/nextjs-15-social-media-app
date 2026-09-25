@@ -8,13 +8,16 @@ import { SongListTile } from "../../components/SongListTile";
 import { RemoveFromSelectionButton } from "../../components/RemoveFromSelectionButton";
 
 interface SelectionPageProps {
-  params: {
+  params: Promise<{
+    selectionId: string;
+  }> | {
     selectionId: string;
   };
 }
 
 export default async function SelectionPage({ params }: SelectionPageProps) {
-  const selection = await getSelectionById(params.selectionId);
+  const resolvedParams = await params;
+  const selection = await getSelectionById(resolvedParams.selectionId);
 
   if (!selection) {
     notFound();

@@ -71,7 +71,7 @@ export default function OrganizationHighlights() {
                                                     <Avatar className="w-4 h-4">
                                                         <AvatarImage src={highlight.user.avatarUrl || undefined} />
                                                         <AvatarFallback className="text-[8px]">
-                                                            {highlight.user.displayName.slice(0, 2)}
+                                                            {(highlight.user.displayName || highlight.user.username || "U").slice(0, 2)}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <span className="truncate max-w-[100px]">{highlight.user.displayName}</span>

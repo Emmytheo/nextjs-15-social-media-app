@@ -6,17 +6,19 @@ import { formatDate } from "date-fns";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import Image from "next/image";
 import EventProfile from "./EventProfile";
 import { EventSidebar } from "@/components/EventSidebar";
 import GalleryTab from "./GalleryTab";
 import ActivitiesGamesTab from "./ActivitiesGamesTab";
-import { Button } from "@/components/ui/button";
+import EventRsvpButton from "./EventRsvpButton";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { Edit } from "lucide-react";
+import { Edit, LayoutDashboard } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface PageProps {
-  params: { "event-id": string };
+  params: Promise<{ "event-id": string }> | { "event-id": string };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }> | { [key: string]: string | string[] | undefined };
 }
 
 export interface EventWithDetails {
@@ -40,30 +42,27 @@ export interface EventWithDetails {
   createdAt: Date;
   updatedAt: Date;
   organizationId: string;
-  attendees: any;
+  attendees?: any;
   organization: {
     id: string;
     name: string;
-    nameId: string;
+    nameId?: string;
   };
   _count: {
     attendees: number;
   };
 }
 
-const getEvent = cache(async (eventId: string, loggedInUserId: string) => {
-  console.log(eventId);
+const getEvent = cache(async (eventId: string) => {
   const event = await prisma.event.findFirst({
     where: {
       id: eventId,
-      // isPublished: true,
     },
     include: {
       organization: {
         select: {
           id: true,
           name: true,
-          // nameId: true,
         },
       },
       _count: {
@@ -80,55 +79,79 @@ const getEvent = cache(async (eventId: string, loggedInUserId: string) => {
 });
 
 export async function generateMetadata({
-  params: { "event-id": eventId },
+  params,
 }: PageProps): Promise<Metadata> {
-  const { user: loggedInUser } = await validateRequest();
-
-  if (!loggedInUser) return {};
-
-  const event = await getEvent(eventId, loggedInUser.id);
-  // console.log(event);
+  const resolvedParams = await params;
+  const eventId = resolvedParams["event-id"];
+  const event = await getEvent(eventId);
 
   return {
     title: `${event.title}`,
+    description: event.description || `Event organized by ${event.organization.name}`,
   };
 }
 
-export default async function Page({
-  params: { "event-id": eventId },
-}: PageProps) {
+export default async function Page({ params, searchParams }: PageProps) {
   const { user: loggedInUser } = await validateRequest();
 
-  if (!loggedInUser) {
-    return (
-      <p className="text-destructive">
-        You&apos;re not authorized to view this page.
-      </p>
-    );
+  const resolvedParams = await params;
+  const eventId = resolvedParams["event-id"];
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const tabParam = resolvedSearchParams?.tab;
+  const currentTab = (Array.isArray(tabParam) ? tabParam[0] : tabParam) || "overview";
+
+  const event = await getEvent(eventId);
+
+  let isRegistered = false;
+  let isAdmin = false;
+
+  if (loggedInUser) {
+    const [attendee, admin] = await Promise.all([
+      prisma.eventAttendee.findUnique({
+        where: {
+          eventId_userId: {
+            eventId,
+            userId: loggedInUser.id,
+          },
+        },
+      }),
+      prisma.organizationAdmin.findFirst({
+        where: {
+          userId: loggedInUser.id,
+          organizationId: event.organizationId,
+        },
+      }),
+    ]);
+
+    isRegistered = !!attendee;
+    isAdmin = !!admin;
   }
 
-  const event = await getEvent(eventId, loggedInUser.id);
-
-  const isAdmin = await prisma.organizationAdmin.findFirst({
-    where: {
-      userId: loggedInUser.id,
-      organizationId: event.organizationId,
-    },
-  });
-
   return (
-    <main className="flex w-full min-w-0 gap-5 pb-20">
+    <main className="flex w-full min-w-0 gap-5">
       <div className="w-full min-w-0 space-y-5">
-        <EventProfile event={event} loggedInUserId={loggedInUser.id} />
-        <Tabs defaultValue="overview" className="w-full">
+        <EventProfile
+          event={event}
+          loggedInUserId={loggedInUser?.id || ""}
+          isRegistered={isRegistered}
+        />
+        <Tabs defaultValue={currentTab} className="w-full">
           <TabsList
             className="sticky top-[70px] z-10 w-full !justify-start overflow-x-auto shadow-md bg-background/95 dark:bg-muted backdrop-blur supports-[backdrop-filter]:bg-background/60"
             style={{ scrollbarWidth: "none" }}
           >
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="tickets">Tickets</TabsTrigger>
-            <TabsTrigger value="activities">Activities</TabsTrigger>
-            <TabsTrigger value="gallery">Gallery</TabsTrigger>
+            <TabsTrigger value="overview" asChild>
+              <Link href="?tab=overview" replace scroll={false}>Overview</Link>
+            </TabsTrigger>
+            <TabsTrigger value="tickets" asChild>
+              <Link href="?tab=tickets" replace scroll={false}>Tickets</Link>
+            </TabsTrigger>
+            <TabsTrigger value="activities" asChild>
+              <Link href="?tab=activities" replace scroll={false}>Activities</Link>
+            </TabsTrigger>
+            <TabsTrigger value="gallery" asChild>
+              <Link href="?tab=gallery" replace scroll={false}>Gallery</Link>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -179,40 +202,58 @@ export default async function Page({
                   </p>
                 )}
 
-                {event.ticketUrl && (
-                  <div className="pt-4">
-                    <Button asChild size="lg" className="w-full sm:w-auto">
-                      <a
-                        href={event.ticketUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Get Tickets
-                      </a>
-                    </Button>
-                  </div>
-                )}
+                <div className="pt-4">
+                  <EventRsvpButton
+                    eventId={event.id}
+                    isRegistered={isRegistered}
+                    ticketUrl={event.ticketUrl}
+                    ticketType={event.ticketType}
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="activities">
-            <ActivitiesGamesTab eventId={eventId} />
+            <ActivitiesGamesTab eventId={eventId} isAdmin={isAdmin} />
           </TabsContent>
 
           <TabsContent value="gallery">
-            <GalleryTab eventId={eventId} />
+            <GalleryTab eventId={eventId} isAdmin={isAdmin} />
           </TabsContent>
         </Tabs>
       </div>
-      <EventSidebar event={event} />
+      <EventSidebar
+        event={event}
+        isRegistered={isRegistered}
+      />
 
       {isAdmin && (
-        <FloatingActionButton
-          href={`/events/${event.id}/edit`}
-          label="Edit Event"
-          icon={<Edit className="h-6 w-6" />}
-        />
+        <div className="fixed bottom-20 right-6 z-50 flex flex-col gap-3 md:hidden">
+          <FloatingActionButton
+            href={`/events/${event.id}/edit`}
+            label="Edit Event"
+            icon={<Edit className="h-6 w-6" />}
+          />
+        </div>
+      )}
+
+      {/* Desktop admin toolbar */}
+      {isAdmin && (
+        <div className="fixed bottom-6 right-6 z-50 hidden md:flex items-center gap-2 rounded-xl border bg-card p-2 shadow-lg">
+          <Button asChild variant="outline" size="sm" className="gap-2">
+            <Link href={`/events/${event.id}/edit`}>
+              <Edit className="size-4" />
+              Edit Event
+            </Link>
+          </Button>
+          <Button asChild size="sm" className="gap-2">
+            <Link href={`/events/${event.id}/manage`}>
+              <LayoutDashboard className="size-4" />
+              Manage Event
+            </Link>
+          </Button>
+        </div>
       )}
     </main>
   );

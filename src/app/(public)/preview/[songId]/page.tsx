@@ -27,13 +27,16 @@ import {
 } from "@/components/ui/tooltip";
 
 interface PublicSongPageProps {
-    params: {
+    params: Promise<{
+        songId: string;
+    }> | {
         songId: string;
     };
 }
 
 export default async function PublicSongPage({ params }: PublicSongPageProps) {
-    const song = await getSong(params.songId);
+    const resolvedParams = await params;
+    const song = await getSong(resolvedParams.songId);
 
     if (!song) {
         notFound();

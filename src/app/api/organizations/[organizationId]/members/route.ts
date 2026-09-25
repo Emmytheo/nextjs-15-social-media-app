@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { organizationId: string } }
+  { params }: { params: Promise<{ organizationId: string }> | { organizationId: string } }
 ) {
   try {
     const { user: loggedInUser } = await validateRequest();
@@ -13,9 +13,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { organizationId } = await params;
+
     const members = await prisma.organizationMember.findMany({
       where: {
-        organizationId: params.organizationId,
+        organizationId,
       },
       include: {
         user: {

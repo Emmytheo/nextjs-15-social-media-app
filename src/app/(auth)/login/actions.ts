@@ -16,10 +16,20 @@ export async function login(
 
     const existingUser = await prisma.user.findFirst({
       where: {
-        username: {
-          equals: username,
-          mode: "insensitive",
-        },
+        OR: [
+          {
+            username: {
+              equals: username,
+              mode: "insensitive",
+            },
+          },
+          {
+            email: {
+              equals: username,
+              mode: "insensitive",
+            },
+          },
+        ],
       },
     });
 
@@ -44,7 +54,7 @@ export async function login(
 
     const session = await lucia.createSession(existingUser.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(
+    (await cookies()).set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes,

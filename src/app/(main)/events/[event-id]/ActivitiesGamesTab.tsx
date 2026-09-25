@@ -25,6 +25,7 @@ import { format } from "date-fns";
 
 interface ActivitiesGamesTabProps {
   eventId: string;
+  isAdmin?: boolean;
 }
 
 export interface EventActivityData {
@@ -176,6 +177,7 @@ const leaderboard = [
 
 export default function ActivitiesGamesTab({
   eventId,
+  isAdmin = false,
 }: ActivitiesGamesTabProps) {
   const {
     data: activitiesData,
@@ -224,7 +226,7 @@ export default function ActivitiesGamesTab({
           <Zap className="h-5 w-5" />
           Activities & Games
         </h3>
-        <CreateEventActivityForm eventId={eventId} />
+        {isAdmin && <CreateEventActivityForm eventId={eventId} />}
       </div>
 
       <Tabs defaultValue="activities" className="w-full">
@@ -262,19 +264,6 @@ export default function ActivitiesGamesTab({
               </div>
             )}
 
-            {!activitiesLoading &&
-              activitiesData?.activities &&
-              activitiesData.activities.length === 0 && (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="p-6 text-center">
-                      <p className="text-muted-foreground">
-                        No Activities Found
-                      </p>
-                    </Card>
-                  ))}
-                </div>
-              )}
 
             {activitiesError && (
               <Card className="p-6 text-center">
@@ -319,12 +308,13 @@ export default function ActivitiesGamesTab({
                             </div>
                             <div className="flex items-center gap-2">
                               <Avatar className="h-8 w-8">
+                                <AvatarImage src={activity.user.avatarUrl || undefined} />
                                 <AvatarFallback>
-                                  {activity.user.displayName.slice(0, 2)}
+                                  {(activity.user.displayName || activity.user.username || "U").slice(0, 2)}
                                 </AvatarFallback>
                               </Avatar>
                               <span className="text-sm font-medium">
-                                {activity.user.displayName}
+                                {activity.user.displayName || activity.user.username}
                               </span>
                             </div>
                           </div>
@@ -363,7 +353,7 @@ export default function ActivitiesGamesTab({
                   Activities and workshops will be scheduled soon. Check back
                   for the latest updates.
                 </p>
-                <CreateEventActivityForm eventId={eventId} />
+                {isAdmin && <CreateEventActivityForm eventId={eventId} />}
               </Card>
             )}
           </div>

@@ -7,13 +7,16 @@ import { getSelectionById } from "@/app/(admin)/music/actions";
 import { SongListTile } from "@/app/(admin)/music/components/SongListTile";
 
 interface PublicSelectionPageProps {
-    params: {
+    params: Promise<{
+        selectionId: string;
+    }> | {
         selectionId: string;
     };
 }
 
 export default async function PublicSelectionPage({ params }: PublicSelectionPageProps) {
-    const selection = await getSelectionById(params.selectionId);
+    const resolvedParams = await params;
+    const selection = await getSelectionById(resolvedParams.selectionId);
 
     if (!selection) {
         notFound();

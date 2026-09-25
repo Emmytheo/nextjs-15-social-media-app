@@ -82,9 +82,7 @@ export function OrganizationFab({
             </Dialog>
 
             <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-                <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-                    <EditOrganizationForm organization={organization} />
-                </DialogContent>
+                <EditOrganizationForm organization={organization} />
             </Dialog>
         </>
     );

@@ -46,7 +46,8 @@ export function CreateOrganizationForm() {
         title: "Organization created",
         description: `${data.name} has been created successfully.`,
       });
-      router.push(`/org/${data.id}`);
+      router.push(`/organization/${(data as any).nameId || data.id}`);
+      router.refresh();
     },
     onError: (error) => {
       toast({

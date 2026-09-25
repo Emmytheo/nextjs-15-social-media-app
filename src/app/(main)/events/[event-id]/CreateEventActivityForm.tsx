@@ -101,7 +101,7 @@ export function CreateEventActivityForm({ eventId }: CreateEventActivityFormProp
           Add Activity
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Event Activity</DialogTitle>
           <DialogDescription>

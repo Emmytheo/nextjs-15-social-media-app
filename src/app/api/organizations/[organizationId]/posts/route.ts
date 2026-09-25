@@ -5,9 +5,10 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params: { organizationId } }: { params: { organizationId: string } },
+  { params }: { params: Promise<{ organizationId: string }> },
 ) {
   try {
+    const { organizationId } = await params;
     const { user } = await validateRequest();
     // if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -39,9 +40,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params: { organizationId } }: { params: { organizationId: string } },
+  { params }: { params: Promise<{ organizationId: string }> },
 ) {
   try {
+    const { organizationId } = await params;
     const { user } = await validateRequest();
 
     if (!user) {

@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image as LucideImage, Video, Calendar, Camera, Share, Download, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import kyInstance from "@/lib/ky";
+import { ImageUpload } from "@/components/ImageUpload";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
 
 interface EventGalleryItem {
   id: string;
@@ -31,6 +34,7 @@ interface GalleryResponse {
 
 interface GalleryTabProps {
   eventId: string;
+  isAdmin?: boolean;
 }
 
 // Mock data for activity highlights (kept as placeholder for now as requested)
@@ -64,12 +68,37 @@ const activityHighlights = [
   }
 ];
 
-export default function GalleryTab({ eventId }: GalleryTabProps) {
+export default function GalleryTab({ eventId, isAdmin = false }: GalleryTabProps) {
   const [selectedMedia, setSelectedMedia] = useState<EventGalleryItem | null>(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadedUrl, setUploadedUrl] = useState("");
+  const [caption, setCaption] = useState("");
+  const queryClient = useQueryClient();
 
   const { data, status } = useQuery({
     queryKey: ["event-gallery", eventId],
     queryFn: () => kyInstance.get(`/api/events/${eventId}/gallery`).json<GalleryResponse>(),
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: async () => {
+      return await kyInstance.post(`/api/events/${eventId}/gallery`, {
+        json: { url: uploadedUrl, caption: caption.trim() || undefined },
+      }).json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event-gallery", eventId] });
+      toast({ description: "Photo added to event gallery!" });
+      setUploadDialogOpen(false);
+      setUploadedUrl("");
+      setCaption("");
+    },
+    onError: (err: any) => {
+      toast({
+        variant: "destructive",
+        description: err.message || "Failed to upload photo to gallery",
+      });
+    },
   });
 
   const galleryItems = data?.galleryItems || [];
@@ -95,10 +124,57 @@ export default function GalleryTab({ eventId }: GalleryTabProps) {
           <Camera className="w-5 h-5" />
           Event Gallery
         </h3>
-        <Button size="sm" variant="outline">
-          <Camera className="w-4 h-4 mr-2" />
-          Add Photos
-        </Button>
+        {isAdmin && (
+          <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" className="rounded-xl font-semibold gap-1.5">
+                <Camera className="w-4 h-4" />
+                Add Photos
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Add Event Photo</DialogTitle>
+                <DialogDescription>
+                  Upload high-resolution photos or moments from this event.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <ImageUpload
+                  value={uploadedUrl}
+                  onChange={setUploadedUrl}
+                  endpoint="eventCover"
+                />
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Caption (Optional)</label>
+                  <Input
+                    placeholder="e.g. Opening keynote presentation"
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setUploadDialogOpen(false)}
+                    disabled={uploadMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={!uploadedUrl || uploadMutation.isPending}
+                    onClick={() => uploadMutation.mutate()}
+                  >
+                    {uploadMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save to Gallery
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <Tabs defaultValue="photos" className="w-full">

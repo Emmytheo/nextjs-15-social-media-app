@@ -39,7 +39,7 @@ export async function createOrganizationSelection(organizationId: string, input:
   const isMember = organization.members.length > 0;
   const isAdmin = organization.admins.length > 0;
 
-  if (!isMember) {
+  if (!isMember && !isAdmin) {
     throw new Error("Access denied");
   }
 

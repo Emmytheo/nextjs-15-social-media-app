@@ -136,7 +136,12 @@ export function ProgramsTab({ organization, isAdmin }: ProgramsTabProps) {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <CardTitle className="text-lg leading-tight">{program.title}</CardTitle>
+                          <Link
+                            href={`/organization/${organization.id}/programs/${program.id}`}
+                            className="hover:text-primary transition-colors"
+                          >
+                            <CardTitle className="text-lg leading-tight">{program.title}</CardTitle>
+                          </Link>
                           <Badge
                             variant={program.status === ProgramStatus.ACTIVE ? "default" : "secondary"}
                             className="text-xs"
@@ -149,7 +154,7 @@ export function ProgramsTab({ organization, isAdmin }: ProgramsTabProps) {
                             <Avatar className="w-5 h-5">
                               <AvatarImage src={program.user.avatarUrl || undefined} />
                               <AvatarFallback className="text-xs">
-                                {program.user.displayName.slice(0, 2)}
+                                {(program.user.displayName || program.user.username || "U").slice(0, 2)}
                               </AvatarFallback>
                             </Avatar>
                             <span>{program.user.displayName}</span>

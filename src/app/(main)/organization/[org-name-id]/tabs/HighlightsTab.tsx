@@ -14,8 +14,10 @@ import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import kyInstance from "@/lib/ky";
 import { formatDate } from "date-fns";
 import { OrganizationHighlightForm } from "../OrganizationHighlightForm";
+import { HighlightLikeButton } from "./HighlightLikeButton";
 import { Link as LucideLink } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface HighlightsTabProps {
   organization: OrganizationWithCounts;
@@ -83,16 +85,42 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
       </div>
 
       <div className="space-y-8">
-        {/* Quick Stats */}
+        {/* Dedicated Highlight Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Active Members", value: organization._count.members.toString(), icon: Users },
-            { label: "Posts Created", value: organization._count.posts.toString(), icon: Book },
-            { label: "Highlights", value: highlights.length.toString(), icon: Star },
-            { label: "Events", value: organization.events?.length.toString() || "0", icon: Calendar }
+            {
+              label: "Published Stories",
+              value: highlights.length.toString(),
+              icon: Star,
+              color: "text-amber-500",
+              bg: "bg-amber-500/10",
+            },
+            {
+              label: "Featured Milestones",
+              value: highlights.filter((h) => h.featured).length.toString(),
+              icon: Award,
+              color: "text-indigo-500",
+              bg: "bg-indigo-500/10",
+            },
+            {
+              label: "Citizen Appreciations",
+              value: highlights.reduce((sum, h) => sum + (h._count?.likes || 0), 0).toString(),
+              icon: Heart,
+              color: "text-rose-500",
+              bg: "bg-rose-500/10",
+            },
+            {
+              label: "Media Records",
+              value: highlights.filter((h) => (h as any).attachments?.length > 0).length.toString(),
+              icon: Book,
+              color: "text-emerald-500",
+              bg: "bg-emerald-500/10",
+            },
           ].map((stat, index) => (
-            <Card key={index} className="p-4 text-center">
-              <stat.icon className="w-6 h-6 mx-auto mb-2 text-primary" />
+            <Card key={index} className="p-4 text-center rounded-2xl border bg-muted/20">
+              <div className={`w-8 h-8 mx-auto mb-2 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center`}>
+                <stat.icon className="w-4 h-4" />
+              </div>
               <div className="text-2xl font-bold">{stat.value}</div>
               <div className="text-xs text-muted-foreground">{stat.label}</div>
             </Card>
@@ -105,12 +133,17 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
         >
           {highlights.length > 0 ? (
             highlights.map((highlight) => (
-              <Card key={highlight.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={highlight.id} className="overflow-hidden rounded-2xl hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <CardTitle className="text-lg leading-tight">{highlight.title}</CardTitle>
+                        <Link
+                          href={`/organization/${organization.id}/highlights/${highlight.id}`}
+                          className="hover:text-primary transition-colors"
+                        >
+                          <CardTitle className="text-lg leading-tight">{highlight.title}</CardTitle>
+                        </Link>
                         {highlight.featured && (
                           <Badge variant="secondary" className="text-xs whitespace-nowrap">
                             ⭐ Featured
@@ -122,7 +155,7 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
                           <Avatar className="w-5 h-5">
                             <AvatarImage src={highlight.user.avatarUrl || undefined} />
                             <AvatarFallback className="text-xs">
-                              {highlight.user.displayName.slice(0, 2)}
+                              {(highlight.user.displayName || highlight.user.username || "U").slice(0, 2)}
                             </AvatarFallback>
                           </Avatar>
                           <span>{highlight.user.displayName}</span>
@@ -161,21 +194,32 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
                   )}
                   {highlight.attachments && highlight.attachments.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
-                      {highlight.attachments.slice(0, 3).map((attachment: { id: string | null | undefined; type: string; }, index: any) => (
-                        <div key={attachment.id} className="aspect-video bg-muted rounded-lg overflow-hidden">
-                          {/* Placeholder for image/video */}
-                          <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                            {attachment.type === 'IMAGE' ? '🖼️' : '🎥'}
-                          </div>
+                      {highlight.attachments.slice(0, 3).map((attachment: any) => (
+                        <div key={attachment.id} className="aspect-video bg-muted rounded-lg overflow-hidden relative">
+                          {attachment.url && attachment.type === 'IMAGE' ? (
+                            <Image
+                              src={attachment.url}
+                              alt="Highlight media"
+                              fill
+                              className="object-cover"
+                            />
+                          ) : attachment.url && attachment.type === 'VIDEO' ? (
+                            <video src={attachment.url} className="w-full h-full object-cover" controls />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                              {attachment.type === 'IMAGE' ? '🖼️' : '🎥'}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
                   <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                    <Button variant="ghost" size="sm">
-                      <Heart className="w-4 h-4 mr-2" />
-                      Like
-                    </Button>
+                    <HighlightLikeButton
+                      highlightId={highlight.id}
+                      initialLikes={highlight._count.likes}
+                      initialIsLiked={highlight.likes && highlight.likes.length > 0}
+                    />
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/organization/${organization.id}/highlights/${highlight.id}`}>
                         Read More
@@ -192,7 +236,7 @@ export function HighlightsTab({ organization, isAdmin }: HighlightsTabProps) {
               <p className="text-sm md:text-md text-muted-foreground mb-4">
                 Highlights will showcase important stories, achievements, and updates from {organization.name}.
               </p>
-              <OrganizationHighlightForm organizationId={organization.id} />
+              {isAdmin && <OrganizationHighlightForm organizationId={organization.id} />}
             </Card>
           )}
 

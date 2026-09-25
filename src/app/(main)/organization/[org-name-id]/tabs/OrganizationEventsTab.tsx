@@ -1,18 +1,28 @@
-import { OrganizationWithCounts } from "../page";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { formatDate } from "date-fns";
 import {
-  BookIcon,
-  CalendarIcon,
-  HeartIcon,
+  Calendar,
+  Clock,
+  MapPin,
   Plus,
-  StarIcon,
-  UsersIcon,
+  Search,
+  Sparkles,
+  Ticket,
+  Users,
+  CheckCircle2,
+  ArrowRight,
+  Archive,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OrganizationWithCounts } from "../page";
 import { EventWithDetails } from "@/app/(main)/events/[event-id]/page";
 
 interface OrganizationEventsTabProps {
@@ -24,148 +34,281 @@ export function OrganizationEventsTab({
   organization,
   isAdmin,
 }: OrganizationEventsTabProps) {
-  const quickStats = [
+  const events = (organization.events as EventWithDetails[] | undefined) || [];
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all-events");
+
+  const now = new Date();
+
+  // Metrics derived specifically from this organization's real events
+  const totalEvents = events.length;
+  const upcomingEvents = useMemo(
+    () => events.filter((e) => new Date(e.startDate) >= now),
+    [events, now]
+  );
+  const pastEvents = useMemo(
+    () => events.filter((e) => new Date(e.startDate) < now),
+    [events, now]
+  );
+
+  const totalAttendees = useMemo(() => {
+    return events.reduce((sum, e) => sum + (e.attendees?.length || 0), 0);
+  }, [events]);
+
+  const freeCount = useMemo(() => {
+    return events.filter((e) => e.ticketType === "FREE" || !e.ticketPrice).length;
+  }, [events]);
+
+  const ticketedCount = totalEvents - freeCount;
+
+  const eventStats = [
     {
-      label: "Active Members",
-      value: organization._count.members.toString(),
-      icon: UsersIcon,
+      label: "Total Gatherings",
+      value: totalEvents.toString(),
+      subtext: "Hosted by this guild",
+      icon: Calendar,
+      color: "text-primary",
+      bg: "bg-primary/10",
     },
     {
-      label: "Posts Created",
-      value: organization._count.posts.toString(),
-      icon: BookIcon,
+      label: "Upcoming Sessions",
+      value: upcomingEvents.length.toString(),
+      subtext: upcomingEvents.length > 0 ? "Open for registration" : "None scheduled",
+      icon: Sparkles,
+      color: "text-indigo-500",
+      bg: "bg-indigo-500/10",
     },
-    { label: "Events Hosted", value: organization.events?.length.toString() || "0", icon: CalendarIcon },
-    { label: "Partnerships", value: "12", icon: HeartIcon },
+    {
+      label: "Total Registrations",
+      value: totalAttendees.toString(),
+      subtext: "Citizen RSVPs & passes",
+      icon: Users,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      label: "Admission Models",
+      value: `${freeCount} Free`,
+      subtext: ticketedCount > 0 ? `+ ${ticketedCount} Ticketed` : "Open Community Access",
+      icon: Ticket,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+    },
   ];
 
-  // ... (highlightedEvents mock data removed or kept if needed, but I'll keep it to minimize diff)
-  const highlightedEvents = [
-    {
-      id: "1",
-      title: "Annual Charity Run 2024",
-      image: "/img/icon.png",
-      date: "2024-10-05",
-      status: "Upcoming",
-      participants: 150,
-      goal: 200,
-    },
-    {
-      id: "2",
-      title: "Leadership Summit",
-      image: "/img/logo.png",
-      date: "2024-09-30",
-      status: "Full",
-      participants: 80,
-      goal: 80,
-    },
-    {
-      id: "3",
-      title: "Community Garden Tour",
-      image: "/img/icon.png",
-      date: "2024-10-12",
-      status: "Registering",
-      participants: 45,
-      goal: 50,
-    },
-  ];
+  const filterEventsList = (list: EventWithDetails[]) => {
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter(
+      (e) =>
+        e.title.toLowerCase().includes(q) ||
+        (e.description && e.description.toLowerCase().includes(q)) ||
+        (e.venue && e.venue.toLowerCase().includes(q)) ||
+        (e.location && e.location.toLowerCase().includes(q))
+    );
+  };
 
-  return (
-    <div className="rounded-2xl bg-card p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Events</h3>
-        {isAdmin && (
-          <Link href={`/events/create/${organization.id}`}>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Event
+  const displayedAll = filterEventsList(events);
+  const displayedUpcoming = filterEventsList(upcomingEvents);
+  const displayedPast = filterEventsList(pastEvents);
+
+  const renderEventList = (list: EventWithDetails[], emptyLabel: string) => {
+    if (list.length === 0) {
+      return (
+        <Card className="p-8 text-center bg-card/50 border border-dashed rounded-2xl">
+          <Calendar className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-30" />
+          <h4 className="text-base font-bold mb-1">{emptyLabel}</h4>
+          <p className="text-muted-foreground text-xs max-w-sm mx-auto mb-4">
+            {searchQuery
+              ? `No events match "${searchQuery}". Try clearing the search query.`
+              : `There are currently no events to display in this section for ${organization.name}.`}
+          </p>
+          {isAdmin && (
+            <Button asChild size="sm" className="rounded-xl font-bold">
+              <Link href={`/events/create?organizationId=${organization.id}`}>
+                <Plus className="mr-1.5 h-4 w-4" />
+                Schedule New Event
+              </Link>
             </Button>
-          </Link>
-        )}
-      </div>
-      <div className="space-y-8">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {quickStats.map((stat, index) => (
-            <Card key={index} className="p-4 text-center">
-              <stat.icon className="mx-auto mb-2 h-6 w-6 text-primary" />
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <div className="text-xs text-muted-foreground">{stat.label}</div>
-            </Card>
-          ))}
-        </div>
+          )}
+        </Card>
+      );
+    }
 
-        <Tabs defaultValue="hot-events" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="hot-events" className="flex gap-2">
-              <CalendarIcon className="h-4 w-4" />
-              Hot Events
-            </TabsTrigger>
-            <TabsTrigger value="all-events" className="flex gap-2">
-              <CalendarIcon className="h-4 w-4" />
-              All Events
-            </TabsTrigger>
-          </TabsList>
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {list.map((event) => {
+          const isUpcoming = new Date(event.startDate) >= now;
 
-          <TabsContent value="hot-events" className="mt-6">
-            <div className="space-y-6">
-              <p className="text-sm text-muted-foreground">
-                Check out Hot Events Organized by {organization.name}
-              </p>
-
-              {organization.events && organization.events.map((event: EventWithDetails) => (
-                <Card key={event.id} className="p-4">
-                  <div className="flex gap-3">
-                    <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
+          return (
+            <Card
+              key={event.id}
+              className="group flex flex-col justify-between overflow-hidden rounded-2xl border bg-card p-4 transition-all hover:shadow-lg hover:border-primary/40"
+            >
+              <div className="space-y-3">
+                <div className="flex gap-3.5 items-start">
+                  {/* Event Thumbnail */}
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500/10 to-primary/10 border relative">
+                    {event.coverPhotoUrl || event.logoUrl ? (
                       <Image
-                        src={event.logoUrl || "/img/icon.png"}
+                        src={event.coverPhotoUrl || event.logoUrl!}
                         alt={event.title}
-                        width={48}
-                        height={48}
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-200"
                       />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h5 className="truncate text-sm font-semibold leading-tight">
-                        {event.title}
-                      </h5>
-                      <p className="mb-2 text-xs text-muted-foreground">
-                        {new Date(event.startDate).toLocaleDateString()}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <Badge
-                          variant={
-                            event.status === "Full"
-                              ? "secondary"
-                              : event.status === "Upcoming"
-                                ? "default"
-                                : "outline"
-                          }
-                          className="text-xs capitalize"
-                        >
-                          {event.status}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          👥 {event.attendees ? event.attendees.length : 0}/{0}
-                        </span>
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-primary font-black text-sm">
+                        <Calendar className="h-6 w-6" />
                       </div>
-                      {/* <div className="mt-2 h-1.5 w-full rounded-full bg-secondary">
-                                      <div
-                                        className="h-1.5 rounded-full bg-primary"
-                                        style={{
-                                          width: `${(event.participants / event.goal) * 100}%`,
-                                        }}
-                                      />
-                                    </div> */}
+                    )}
+                  </div>
+
+                  {/* Title & Metadata */}
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Badge
+                        variant={event.ticketType === "FREE" || !event.ticketPrice ? "secondary" : "default"}
+                        className="text-[10px] font-bold px-2 py-0"
+                      >
+                        {event.ticketType === "FREE" || !event.ticketPrice
+                          ? "Free Entry"
+                          : `$${event.ticketPrice}`}
+                      </Badge>
+                      {isUpcoming ? (
+                        <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] px-2 py-0">
+                          Upcoming
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground text-[10px] px-2 py-0">
+                          Completed
+                        </Badge>
+                      )}
+                    </div>
+
+                    <Link href={`/events/${event.id}`}>
+                      <h4 className="text-sm sm:text-base font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                        {event.title}
+                      </h4>
+                    </Link>
+
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span>{formatDate(new Date(event.startDate), "MMM d, yyyy • p")}</span>
                     </div>
                   </div>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+                </div>
 
-          <TabsContent value="highlights" className="mt-6"></TabsContent>
-        </Tabs>
+                {event.description && (
+                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                    {event.description}
+                  </p>
+                )}
+
+                {event.venue && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1 border-t border-border/50">
+                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="truncate">{event.venue}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Footer */}
+              <div className="flex items-center justify-between gap-2 pt-3 mt-3 border-t border-border/50 text-xs">
+                <span className="text-muted-foreground font-semibold flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5 text-primary" />
+                  {event.attendees?.length || 0} RSVPs
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <Button asChild size="sm" variant="outline" className="rounded-xl h-8 px-2.5 text-xs font-semibold">
+                    <Link href={`/events/${event.id}`}>
+                      Details
+                      <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <div className="rounded-2xl sm:rounded-3xl bg-card p-5 sm:p-7 border border-border/80 shadow-xs space-y-6">
+      {/* Header with Title and Create Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-xl font-black tracking-tight flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            Guild Events & Gatherings
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Townhalls, masterclasses, and civic workshops organized by {organization.name}.
+          </p>
+        </div>
+
+        {isAdmin && (
+          <Button asChild className="rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs">
+            <Link href={`/events/create?organizationId=${organization.id}`}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Schedule Event
+            </Link>
+          </Button>
+        )}
+      </div>
+
+      {/* Real Event Statistics Cards (Replaced duplicated members/posts stats) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {eventStats.map((stat, index) => (
+          <Card key={index} className="p-4 sm:p-5 rounded-2xl border bg-muted/20 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-muted-foreground">{stat.label}</span>
+              <div className={`h-8 w-8 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center`}>
+                <stat.icon className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
+              {stat.value}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-1 font-medium">{stat.subtext}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Search and Tabs */}
+      <div className="space-y-4 pt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+            <TabsList className="rounded-xl p-1 bg-muted/50 border">
+              <TabsTrigger value="all-events" className="rounded-lg text-xs font-bold px-3">
+                All Gatherings ({totalEvents})
+              </TabsTrigger>
+              <TabsTrigger value="upcoming" className="rounded-lg text-xs font-bold px-3">
+                Upcoming ({upcomingEvents.length})
+              </TabsTrigger>
+              <TabsTrigger value="past" className="rounded-lg text-xs font-bold px-3">
+                Past Archives ({pastEvents.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search guild events..."
+              className="pl-9 h-9 text-xs rounded-xl"
+            />
+          </div>
+        </div>
+
+        {/* Tab Contents */}
+        {activeTab === "all-events" && renderEventList(displayedAll, "No events found")}
+        {activeTab === "upcoming" && renderEventList(displayedUpcoming, "No upcoming gatherings")}
+        {activeTab === "past" && renderEventList(displayedPast, "No past events recorded")}
       </div>
     </div>
   );

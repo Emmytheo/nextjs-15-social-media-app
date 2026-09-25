@@ -122,9 +122,11 @@ export function OrganizationFeed({ organization, isAdmin }: OrganizationFeedProp
       className="space-y-5"
       onBottomReached={() => hasNextPage && !isFetching && fetchNextPage()}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold"></h3>
-      </div>
+      {isAdmin && (
+        <div className="rounded-2xl bg-card shadow-sm border border-muted/40 overflow-hidden">
+          <OrganizationPostEditor organizationId={organization.id} />
+        </div>
+      )}
 
       {posts.map((post) => (
         <Post key={post.id} post={post as any} type="organization" organization={organization} />

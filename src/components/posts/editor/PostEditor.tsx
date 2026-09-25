@@ -1,4 +1,4 @@
-// "use client";
+"use client";
 
 import { useSession } from "@/app/(main)/SessionProvider";
 import LoadingButton from "@/components/LoadingButton";
@@ -44,7 +44,7 @@ export default function PostEditor() {
         italic: false,
       }),
       Placeholder.configure({
-        placeholder: "What's crack-a-lackin'?",
+        placeholder: "Share an announcement, milestone progress, or discussion with your community...",
       }),
     ],
   });
@@ -78,15 +78,15 @@ export default function PostEditor() {
   }
 
   return (
-    <div className="flex flex-col gap-5 rounded-2xl bg-card p-5 shadow-sm">
-      <div className="flex gap-5">
-        <UserAvatar avatarUrl={user?.avatarUrl} className="hidden sm:inline" />
-        <div {...rootProps} className="w-full">
+    <div className="flex flex-col gap-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm">
+      <div className="flex gap-4 items-start">
+        <UserAvatar avatarUrl={user?.avatarUrl} className="hidden sm:inline mt-1 flex-shrink-0" />
+        <div {...rootProps} className="w-full min-w-0">
           <EditorContent
             editor={editor}
             className={cn(
-              "max-h-[20rem] w-full overflow-y-auto rounded-2xl bg-background px-5 py-3",
-              isDragActive && "outline-dashed",
+              "min-h-[5.5rem] max-h-[20rem] w-full overflow-y-auto rounded-2xl bg-background/80 border border-border/70 focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15 transition-all px-4 py-3 text-[15px] leading-relaxed",
+              isDragActive && "outline-dashed border-primary",
             )}
             onPaste={onPaste}
           />
@@ -99,25 +99,32 @@ export default function PostEditor() {
           removeAttachment={removeAttachment}
         />
       )}
-      <div className="flex items-center justify-end gap-3">
-        {isUploading && (
-          <>
-            <span className="text-sm">{uploadProgress ?? 0}%</span>
-            <Loader2 className="size-5 animate-spin text-primary" />
-          </>
-        )}
-        <AddAttachmentsButton
-          onFilesSelected={startUpload}
-          disabled={isUploading || attachments.length >= 5}
-        />
-        <LoadingButton
-          onClick={onSubmit}
-          loading={mutation.isPending}
-          disabled={!input.trim() || isUploading}
-          className="min-w-20"
-        >
-          Post
-        </LoadingButton>
+      <div className="flex items-center justify-between border-t border-border/50 pt-3">
+        <div className="flex items-center gap-2">
+          <AddAttachmentsButton
+            onFilesSelected={startUpload}
+            disabled={isUploading || attachments.length >= 5}
+          />
+          <span className="text-xs text-muted-foreground hidden sm:inline">
+            Attach photo or video
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          {isUploading && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
+              <span>{uploadProgress ?? 0}%</span>
+              <Loader2 className="size-4 animate-spin text-primary" />
+            </div>
+          )}
+          <LoadingButton
+            onClick={onSubmit}
+            loading={mutation.isPending}
+            disabled={!input.trim() || isUploading}
+            className="rounded-xl px-5 font-bold shadow-sm"
+          >
+            Post
+          </LoadingButton>
+        </div>
       </div>
     </div>
   );

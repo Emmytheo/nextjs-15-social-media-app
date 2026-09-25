@@ -13,9 +13,9 @@ export interface EditOrganizationInput extends CreateOrganizationInput {
 }
 
 export async function createOrganization(data: CreateOrganizationInput): Promise<Organization> {
-  return ky.post("api/organizations", { json: data }).json();
+  return ky.post("/api/organizations", { json: data }).json();
 }
 
 export async function editOrganization(data: EditOrganizationInput): Promise<Organization> {
-  return ky.patch("api/organizations", { json: data }).json();
+  return ky.patch("/api/organizations", { json: data }).json();
 }

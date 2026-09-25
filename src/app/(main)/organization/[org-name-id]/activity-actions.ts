@@ -123,3 +123,67 @@ export async function updateOrganizationActivity(
 
   return updatedActivity;
 }
+
+export async function joinOrganizationActivity(activityId: string): Promise<{ success: boolean; message: string }> {
+  const { user } = await validateRequest();
+
+  if (!user) {
+    return { success: false, message: "You must be signed in" };
+  }
+
+  const existing = await prisma.organizationActivityParticipant.findUnique({
+    where: {
+      userId_activityId: {
+        userId: user.id,
+        activityId,
+      },
+    },
+  });
+
+  if (existing) {
+    return { success: true, message: "Already participating in this activity" };
+  }
+
+  await prisma.organizationActivityParticipant.create({
+    data: {
+      userId: user.id,
+      activityId,
+      status: "CONFIRMED",
+    },
+  });
+
+  return { success: true, message: "Joined activity successfully!" };
+}
+
+export async function leaveOrganizationActivity(activityId: string): Promise<{ success: boolean; message: string }> {
+  const { user } = await validateRequest();
+
+  if (!user) {
+    return { success: false, message: "You must be signed in" };
+  }
+
+  const existing = await prisma.organizationActivityParticipant.findUnique({
+    where: {
+      userId_activityId: {
+        userId: user.id,
+        activityId,
+      },
+    },
+  });
+
+  if (!existing) {
+    return { success: false, message: "Not registered for this activity" };
+  }
+
+  await prisma.organizationActivityParticipant.delete({
+    where: {
+      userId_activityId: {
+        userId: user.id,
+        activityId,
+      },
+    },
+  });
+
+  return { success: true, message: "Left activity" };
+}
+

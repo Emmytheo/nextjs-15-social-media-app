@@ -7,8 +7,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model User {
@@ -43,6 +44,12 @@ model User {
   highlightLikes          OrganizationHighlightLike[]
   activityParticipants    OrganizationActivityParticipant[]
   issuedOrganizationInvitations OrganizationInvitation[]
+
+  wallet                Wallet?
+  walletTransactions    WalletTransaction[]
+  createdCampaigns      CrowdfundingCampaign[]
+  campaignContributions CampaignContribution[]
+  financialAuditLogs    FinancialAuditLog[]
 
   createdAt     DateTime        @default(now())
   EventActivity EventActivity[]
@@ -210,6 +217,9 @@ model Organization {
   events     Event[]
   notifications Notification[]
   invitations OrganizationInvitation[]
+
+  wallet                Wallet?
+  crowdfundingCampaigns CrowdfundingCampaign[]
 
   @@map("organizations")
 }
@@ -634,4 +644,197 @@ model OrganizationGallery {
   createdAt DateTime @default(now())
 
   @@map("organization_gallery")
+}
+
+// =========================================================================
+// FINANCIAL & ESCROW MANAGEMENT MODELS (COMMUNITYOS & COPTELLER ALIGNMENT)
+// =========================================================================
+
+model Wallet {
+  id             String       @id @default(cuid())
+  userId         String?      @unique
+  user           User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?      @unique
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  balance        Float        @default(0.0) // Available funds
+  escrowBalance  Float        @default(0.0) // Funds locked in escrow
+  currency       String       @default("USD")
+  status         WalletStatus @default(ACTIVE)
+
+  transactions   WalletTransaction[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("wallets")
+}
+
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+}
+
+model WalletTransaction {
+  id           String            @id @default(cuid())
+  reference    String            @unique
+  walletId     String
+  wallet       Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  userId       String?
+  user         User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  type         TransactionType
+  amount       Float
+  balanceAfter Float
+  status       TransactionStatus @default(COMPLETED)
+  narration    String
+  metadata     Json?
+
+  createdAt    DateTime          @default(now())
+
+  @@map("wallet_transactions")
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER_IN
+  TRANSFER_OUT
+  ESCROW_LOCK
+  ESCROW_RELEASE
+  ESCROW_REFUND
+  CAMPAIGN_PLEDGE
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+model CrowdfundingCampaign {
+  id             String               @id @default(cuid())
+  slug           String               @unique
+  title          String
+  tagline        String?
+  description    String
+  coverUrl       String?
+  category       CampaignCategory     @default(COMMUNITY_PROJECT)
+
+  targetAmount   Float
+  raisedAmount   Float                @default(0.0)
+  currency       String               @default("USD")
+  startDate      DateTime             @default(now())
+  deadline       DateTime?
+  status         CampaignStatus       @default(ACTIVE)
+
+  escrowEnabled  Boolean              @default(true)
+  minPledge      Float?               @default(5.0)
+
+  creatorId      String
+  creator        User                 @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  organizationId String?
+  organization   Organization?        @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  contributions  CampaignContribution[]
+  milestones     CampaignMilestone[]
+
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@map("crowdfunding_campaigns")
+}
+
+enum CampaignCategory {
+  COMMUNITY_PROJECT
+  MUTUAL_AID
+  CREATIVE_GRANT
+  TECH_INNOVATION
+  EMERGENCY_RELIEF
+  INFRASTRUCTURE
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  FULLY_FUNDED
+  IN_ESCROW
+  COMPLETED
+  CANCELLED
+}
+
+model CampaignContribution {
+  id         String               @id @default(cuid())
+  campaignId String
+  campaign   CrowdfundingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  userId     String
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount     Float
+  anonymous  Boolean              @default(false)
+  comment    String?
+  status     ContributionStatus   @default(ESCROWED)
+
+  createdAt  DateTime             @default(now())
+
+  @@map("campaign_contributions")
+}
+
+enum ContributionStatus {
+  ESCROWED
+  RELEASED
+  REFUNDED
+}
+
+model CampaignMilestone {
+  id           String               @id @default(cuid())
+  campaignId   String
+  campaign     CrowdfundingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  title        String
+  description  String
+  targetAmount Float
+  percentage   Float?
+  order        Int                  @default(1)
+
+  proofOfWork  String?              // Deliverables, invoices, photos URL
+  status       MilestoneStatus      @default(LOCKED)
+  approvedBy   String?
+  releasedAt   DateTime?
+
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@map("campaign_milestones")
+}
+
+enum MilestoneStatus {
+  LOCKED
+  SUBMITTED
+  APPROVED
+  REJECTED
+  RELEASED
+}
+
+model FinancialAuditLog {
+  id          String   @id @default(cuid())
+  actorId     String
+  actor       User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  actorRole   String   @default("member")
+  action      String
+  entityType  String
+  entityId    String
+  amount      Float?
+  beforeState Json?
+  afterState  Json?
+  ipAddress   String?
+  metadata    Json?
+
+  createdAt   DateTime @default(now())
+
+  @@map("financial_audit_logs")
 }

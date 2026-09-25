@@ -172,11 +172,7 @@ export function OrganizationSidebar({
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* Placeholder for events */}
-            <Skeleton className="h-16 rounded bg-muted" />
-            <Skeleton className="h-16 rounded bg-muted" />
-          </div>
+          <p className="text-sm text-muted-foreground py-2">No upcoming events.</p>
         )}
       </div>
     </div>

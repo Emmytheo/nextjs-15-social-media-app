@@ -147,3 +147,36 @@
 .str-chat__channel-search-bar-button--exit-search {
   display: none;
 }
+
+@layer utilities {
+  .glass-panel {
+    background: color-mix(in srgb, hsl(var(--card)) 80%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, hsl(var(--border)) 70%, transparent);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 25px -5px color-mix(in srgb, hsl(var(--primary)) 35%, transparent);
+  }
+
+  .glow-amber {
+    box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.35);
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, hsl(var(--muted-foreground)) 25%, transparent);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, hsl(var(--muted-foreground)) 45%, transparent);
+  }
+}

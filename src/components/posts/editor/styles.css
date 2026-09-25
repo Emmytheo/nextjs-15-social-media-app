@@ -1,11 +1,24 @@
-.tiptap p.is-editor-empty:first-child::before {
-  color: theme("colors.muted.foreground");
+.tiptap.ProseMirror {
+  outline: none;
+  min-height: 4.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.tiptap.ProseMirror p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.tiptap p.is-editor-empty:first-child::before,
+.tiptap p.is-empty:first-child::before,
+.tiptap.ProseMirror.is-editor-empty:first-child::before {
+  color: hsl(var(--muted-foreground));
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
-}
-
-.tiptap.ProseMirror {
-  outline: none;
+  line-height: 1.5;
+  opacity: 0.65;
 }

@@ -1,11 +1,11 @@
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { CreateEventForm } from "../CreateEventForm";
 
 interface PageProps {
-  params: { "organization-id": string };
+  params: Promise<{ "organization-id": string }> | { "organization-id": string };
 }
 
 const getOrganization = cache(
@@ -24,14 +24,15 @@ const getOrganization = cache(
   },
 );
 
-export default async function CreateEventPage({
-  params: { "organization-id": organizationId },
-}: PageProps) {
+export default async function CreateEventPage({ params }: PageProps) {
   const { user: loggedInUser } = await validateRequest();
 
   if (!loggedInUser) {
-    return <div>You must be logged in to create an event.</div>;
+    redirect("/login");
   }
+
+  const resolvedParams = await params;
+  const organizationId = resolvedParams["organization-id"];
 
   const organization = await getOrganization(organizationId, loggedInUser.id);
 
@@ -41,11 +42,10 @@ export default async function CreateEventPage({
 
   // Check if user is an admin of this organization
   const isAdmin = organization.admins.length > 0;
-  const isSuperAdmin = true; // For testing
 
-  if (!isAdmin && !isSuperAdmin) {
+  if (!isAdmin) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full max-w-2xl mx-auto py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-destructive mb-4">
             Access Denied
@@ -59,7 +59,7 @@ export default async function CreateEventPage({
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="w-full max-w-4xl mx-auto">
       <CreateEventForm
         organizationId={organizationId}
         organizationName={organization.name}

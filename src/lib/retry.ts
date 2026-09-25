@@ -38,6 +38,12 @@ function isDatabaseError(error: unknown): boolean {
     'too many connections',
     'unable to connect',
     'connection pool',
+    'p1001',
+    'p1002',
+    'p1003',
+    'p2024',
+    'p1017',
+    'can\'t reach database server',
   ];
 
   // Check error code or message

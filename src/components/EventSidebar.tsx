@@ -1,124 +1,138 @@
 import { EventWithDetails } from "@/app/(main)/events/[event-id]/page";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import EventRsvpButton from "@/app/(main)/events/[event-id]/EventRsvpButton";
+import { Calendar, MapPin, Building2, Ticket, Users, CheckCircle2, Sparkles, Navigation } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "date-fns";
 
 interface EventSidebarProps {
   event: EventWithDetails;
+  isRegistered?: boolean;
 }
 
-export function EventSidebar({ event }: EventSidebarProps) {
+export function EventSidebar({ event, isRegistered = false }: EventSidebarProps) {
+  const startDateObj = new Date(event.startDate);
+  const endDateObj = event.endDate ? new Date(event.endDate) : null;
+  const isEndDateValid = endDateObj && endDateObj.getTime() >= startDateObj.getTime();
+
   return (
-    <div className="sticky top-[5.25rem] hidden h-fit w-80 flex-none space-y-5 xl:block">
-      <Card>
-        <CardHeader>
-          <CardTitle>Event Details</CardTitle>
+    <div className="sticky top-[5.25rem] hidden h-fit w-72 xl:w-80 flex-none space-y-4 lg:block">
+      <Card className="rounded-3xl border border-border/70 shadow-sm overflow-hidden bg-card">
+        <CardHeader className="pb-3 border-b border-border/40 bg-muted/20">
+          <CardTitle className="text-base font-bold flex items-center justify-between">
+            <span>Event Registration</span>
+            <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-wider bg-background">
+              {event.status}
+            </Badge>
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Quick Info */}
+        <CardContent className="space-y-4 pt-4">
+          {/* Quick Schedule */}
           <div className="space-y-3">
-            {event.startDate && (
-              <div>
-                <h4 className="font-semibold text-sm">Date & Time</h4>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(event.startDate).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+            <div className="flex items-start gap-3">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Calendar className="size-4" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Date & Time</h4>
+                <p className="text-sm font-semibold text-foreground">
+                  {formatDate(startDateObj, "EEE, MMMM d, yyyy")}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(event.startDate).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                  {event.endDate && ` - ${new Date(event.endDate).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}`}
+                <p className="text-xs text-muted-foreground">
+                  {formatDate(startDateObj, "h:mm a")}
+                  {isEndDateValid && endDateObj && ` - ${formatDate(endDateObj, "h:mm a")}`}
                 </p>
               </div>
-            )}
+            </div>
 
-            {event.venue && (
-              <div>
-                <h4 className="font-semibold text-sm">Venue</h4>
-                <p className="text-sm text-muted-foreground">{event.venue}</p>
+            {/* Venue & Address */}
+            {(event.venue || event.location || event.address) && (
+              <div className="flex items-start gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <MapPin className="size-4" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Location</h4>
+                  {event.venue && (
+                    <p className="text-sm font-semibold text-foreground truncate">{event.venue}</p>
+                  )}
+                  {event.location && (
+                    <p className="text-xs text-muted-foreground truncate">{event.location}</p>
+                  )}
+                  {event.address && (
+                    <p className="text-xs text-muted-foreground/80 truncate mt-0.5">{event.address}</p>
+                  )}
+                </div>
               </div>
             )}
 
-            {event.location && (
-              <div>
-                <h4 className="font-semibold text-sm">Location</h4>
-                <p className="text-sm text-muted-foreground">{event.location}</p>
-              </div>
-            )}
-
-            {event.address && (
-              <div>
-                <h4 className="font-semibold text-sm">Address</h4>
-                <p className="text-sm text-muted-foreground">{event.address}</p>
-              </div>
-            )}
-
+            {/* Category */}
             {event.category && (
-              <div>
-                <h4 className="font-semibold text-sm">Category</h4>
-                <p className="text-sm text-muted-foreground">{event.category}</p>
+              <div className="flex items-start gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                  <Sparkles className="size-4" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Category</h4>
+                  <p className="text-sm font-semibold text-foreground">{event.category}</p>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Ticket Info */}
-          <div className="border-t pt-4">
-            <h4 className="font-semibold text-sm mb-2">Tickets</h4>
-            <div className="space-y-2">
-              {event.ticketType === "FREE" && (
-                <div className="flex items-center gap-2">
-                  <span className="text-green-600 font-semibold">FREE</span>
-                </div>
+          {/* Ticket & Attendance Badge */}
+          <div className="rounded-2xl bg-muted/40 p-3 border border-border/50 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-muted-foreground">Admission:</span>
+              {event.ticketType === "FREE" ? (
+                <span className="font-extrabold text-emerald-600 dark:text-emerald-400">Free RSVP</span>
+              ) : event.ticketPrice ? (
+                <span className="font-extrabold text-primary">${event.ticketPrice} USD</span>
+              ) : (
+                <span className="font-semibold text-foreground">Standard</span>
               )}
-
-              {event.ticketType === "PAID" && event.ticketPrice && (
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">${event.ticketPrice}</span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Attendees:</span>
-                <span className="font-semibold">{event._count.attendees}</span>
-              </div>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-muted-foreground">Confirmed Guests:</span>
+              <span className="font-bold text-foreground">{event._count.attendees.toLocaleString()}</span>
             </div>
           </div>
 
           {/* Organization Info */}
-          <div className="border-t pt-4">
-            <h4 className="font-semibold text-sm mb-2">Organized by</h4>
-            <a
+          <div className="border-t border-border/50 pt-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Host Organization</h4>
+              <span className="text-[10px] text-primary font-bold">Verified</span>
+            </div>
+            <Link
               href={`/organization/${event.organization.id}`}
-              className="flex items-center gap-2 text-primary hover:underline"
+              className="flex items-center gap-2.5 rounded-xl p-2 hover:bg-muted/70 transition-colors border border-transparent hover:border-border/60 group"
             >
-              <span className="font-medium">{event.organization.name}</span>
-            </a>
+              <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <Building2 className="size-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-xs text-foreground truncate group-hover:text-primary transition-colors">
+                  {event.organization.name}
+                </p>
+                <p className="text-[10px] text-muted-foreground truncate">View Guild Profile & Schemes</p>
+              </div>
+            </Link>
           </div>
 
           {/* Action Button */}
-          {event.ticketUrl && (
-            <div className="border-t pt-4">
-              <a
-                href={event.ticketUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors inline-block text-center font-medium"
-              >
-                {event.ticketType === "FREE" ? "Register Now" : "Get Tickets"}
-              </a>
-            </div>
-          )}
+          <div className="pt-2">
+            <EventRsvpButton
+              eventId={event.id}
+              isRegistered={isRegistered}
+              ticketUrl={event.ticketUrl}
+              ticketType={event.ticketType}
+              className="w-full font-bold shadow-md hover:shadow-lg transition-all"
+            />
+          </div>
         </CardContent>
       </Card>
-
-      {/* Additional info sections can be added here */}
     </div>
   );
 }

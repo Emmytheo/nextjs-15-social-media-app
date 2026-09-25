@@ -1,56 +1,24 @@
 import { validateRequest } from "@/auth";
 import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
+import { getOrganizationHighlightInclude } from "@/lib/types";
 
 export async function GET(
   request: NextRequest,
-  { params: { organizationId } }: { params: { organizationId: string } },
+  { params }: { params: Promise<{ organizationId: string }> | { organizationId: string } },
 ) {
   try {
     const { user } = await validateRequest();
     // if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
+    const { organizationId } = await params;
     const cursor = request.nextUrl.searchParams.get("cursor") || undefined;
 
     const pageSize = 10;
 
     const highlights = await prisma.organizationHighlight.findMany({
       where: { organizationId, published: true },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            avatarUrl: true,
-          },
-        },
-        likes: {
-          where: {
-            userId: user?.id ?? "",
-          },
-          select: {
-            userId: true,
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
-        activity: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        program: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
+      include: getOrganizationHighlightInclude(user?.id ?? ""),
       orderBy: { createdAt: "desc" },
       take: pageSize + 1,
       cursor: cursor ? { id: cursor } : undefined,
@@ -72,7 +40,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params: { organizationId } }: { params: { organizationId: string } },
+  { params }: { params: Promise<{ organizationId: string }> | { organizationId: string } },
 ) {
   try {
     const { user } = await validateRequest();
@@ -80,6 +48,8 @@ export async function POST(
     if (!user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { organizationId } = await params;
 
     // Check if user is admin or member
     const organization = await prisma.organization.findUnique({
@@ -101,7 +71,7 @@ export async function POST(
     const isMember = organization.members.length > 0;
     const isAdmin = organization.admins.length > 0;
 
-    if (!isMember) {
+    if (!isMember && !isAdmin) {
       return Response.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -128,29 +98,7 @@ export async function POST(
           })) || [],
         },
       },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            avatarUrl: true,
-          },
-        },
-        likes: {
-          where: {
-            userId: user.id,
-          },
-          select: {
-            userId: true,
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
-      },
+      include: getOrganizationHighlightInclude(user.id),
     });
 
     return Response.json(highlight);

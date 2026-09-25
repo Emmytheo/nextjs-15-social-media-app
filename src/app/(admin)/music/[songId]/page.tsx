@@ -24,13 +24,16 @@ import { SongActions } from "../components/SongActions";
 import { SongPlayer } from "@/app/(admin)/music/components/SongPlayer";
 
 interface SongPageProps {
-  params: {
+  params: Promise<{
+    songId: string;
+  }> | {
     songId: string;
   };
 }
 
 export default async function SongPage({ params }: SongPageProps) {
-  const song = await getSong(params.songId);
+  const resolvedParams = await params;
+  const song = await getSong(resolvedParams.songId);
 
   if (!song) {
     notFound();

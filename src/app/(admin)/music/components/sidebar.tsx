@@ -117,10 +117,15 @@ export function AppSidebar({
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Choirscape</span>
-              </a>
+              <Link href="/" className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-amber-500 text-primary-foreground font-black text-xs">
+                  OS
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-sm font-bold tracking-tight">CommunityOS</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">Music Studio</span>
+                </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -363,6 +368,34 @@ export function AppSidebar({
         </div>
       </SidebarContent>
       <SidebarFooter>
+        <div className="mb-2 px-2 space-y-1">
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-3.5"
+            >
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Main Feed
+          </Link>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <LayoutDashboardIcon className="size-3.5" />
+            Platform Dashboard
+          </Link>
+        </div>
         <NavUser />
       </SidebarFooter>
     </SidebarNew>

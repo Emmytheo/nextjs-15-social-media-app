@@ -15,12 +15,14 @@ export default function Page() {
         <div className="w-full space-y-5 md:space-y-10 overflow-y-auto p-5 md:p-10 md:w-1/2">
           <div className="space-y-1 text-center">
             <div className="flex flex-col items-center justify-center space-y-4">
-              <img src={"/logo.svg"} alt="Logo" className="h-16 w-16" />
-              <h1 className="text-2xl font-bold">Create an Account</h1>
+              <img src={"/logo.svg"} alt="CommunityOS Logo" className="h-16 w-16" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
+                Join Community<span className="text-foreground">OS</span>
+              </h1>
             </div>
 
             <p className="text-muted-foreground">
-              Join our diverse, multicommunity system tailored for organizations, groups, and communities.
+              Create an account to join living community hubs, participate in events, and access the escrow crowdfunding wallet.
             </p>
           </div>
           <div className="space-y-5 md:space-y-10">

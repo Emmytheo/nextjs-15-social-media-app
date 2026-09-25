@@ -5,12 +5,13 @@ import { ProgramStatus } from "@prisma/client";
 
 export async function GET(
   request: NextRequest,
-  { params: { organizationId } }: { params: { organizationId: string } },
+  { params }: { params: Promise<{ organizationId: string }> | { organizationId: string } },
 ) {
   try {
     const { user } = await validateRequest();
     // if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
+    const { organizationId } = await params;
     const cursor = request.nextUrl.searchParams.get("cursor") || undefined;
 
     const pageSize = 10;
@@ -70,7 +71,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params: { organizationId } }: { params: { organizationId: string } },
+  { params }: { params: Promise<{ organizationId: string }> | { organizationId: string } },
 ) {
   try {
     const { user } = await validateRequest();
@@ -78,6 +79,8 @@ export async function POST(
     if (!user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { organizationId } = await params;
 
     // Check if user is admin or member
     const organization = await prisma.organization.findUnique({

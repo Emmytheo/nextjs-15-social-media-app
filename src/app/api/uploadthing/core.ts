@@ -20,6 +20,12 @@ export const ourFileRouter = {
     .onUploadComplete(() => {}),
   organizationBanner: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .onUploadComplete(() => {}),
+  eventCover: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
+    .onUploadComplete(() => {}),
+  eventLogo: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+    .onUploadComplete(() => {}),
+  campaignCover: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
+    .onUploadComplete(() => {}),
   songAudio: f({ audio: { maxFileSize: "16MB", maxFileCount: 1 } })
     .middleware(async () => {
       const { user } = await validateRequest();

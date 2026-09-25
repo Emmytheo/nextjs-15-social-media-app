@@ -40,14 +40,18 @@ import prisma from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 interface MusicPageProps {
-  searchParams: {
+  searchParams: Promise<{
+    q?: string;
+    genre?: string;
+  }> | {
     q?: string;
     genre?: string;
   };
 }
 
 export default async function MusicPage({ searchParams }: MusicPageProps) {
-  const songs = await getSongs(searchParams.q, searchParams.genre);
+  const resolvedParams = searchParams ? await searchParams : {};
+  const songs = await getSongs(resolvedParams.q, resolvedParams.genre);
   const recentSongs = await getRecentSongs(10);
   const playlists = await getPlaylists();
   const selections = await getOrganizationSelections();

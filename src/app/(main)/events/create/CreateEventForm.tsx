@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
 
 const createEventSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -46,6 +47,8 @@ const createEventSchema = z.object({
   ticketType: z.enum(["FREE", "PAID", "DONATION"]),
   ticketPrice: z.coerce.number().optional(),
   ticketUrl: z.string().url().optional().or(z.literal("")),
+  coverPhotoUrl: z.string().optional(),
+  logoUrl: z.string().optional(),
   programmeOverview: z.string().optional(),
   organizationId: z.string(),
 });
@@ -80,6 +83,8 @@ export function CreateEventForm({
       ticketType: "FREE",
       ticketPrice: undefined,
       ticketUrl: "",
+      coverPhotoUrl: "",
+      logoUrl: "",
       programmeOverview: "",
       organizationId,
     },
@@ -93,6 +98,8 @@ export function CreateEventForm({
 
       const submitData = {
         ...values,
+        coverPhotoUrl: values.coverPhotoUrl || undefined,
+        logoUrl: values.logoUrl || undefined,
         ticketPrice: values.ticketType === "PAID" ? values.ticketPrice : undefined,
         ticketUrl: values.ticketUrl || undefined,
         endDate: values.endDate || undefined,
@@ -118,8 +125,51 @@ export function CreateEventForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Create Event for {organizationName}</h2>
+        <div className="space-y-5">
+          <div className="border-b pb-3">
+            <h2 className="text-xl font-bold">Create Event for {organizationName}</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Set up your gathering details, ticketing, and media.
+            </p>
+          </div>
+
+          {/* Visuals / Media */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl border bg-muted/20 p-4">
+            <FormField
+              control={form.control}
+              name="coverPhotoUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">Cover Banner (Recommended)</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      endpoint="eventCover"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="logoUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">Event Logo / Icon (Optional)</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      endpoint="eventLogo"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}
